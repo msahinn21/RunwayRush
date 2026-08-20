@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Runway Rush — Prototip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grass1:#79c257; --grass2:#6fb84e; --apron:#ccd5da; --apron2:#b9c3c9;
+  --asphalt:#39414b; --line:#f6c94a; --ink:#253238; --blue:#2f6fed;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Nunito',system-ui,-apple-system,sans-serif;color:var(--ink);
+  background:radial-gradient(120% 90% at 50% 0%, #bfe8ff 0%, #a5dcf5 34%, #8fcf6f 100%);
+  overflow:hidden; user-select:none;-webkit-user-select:none; touch-action:manipulation;
+}
+h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
+.hidden{display:none !important}
+
+/* ---------- Ekranlar / Overlay ---------- */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+#startScreen{background:radial-gradient(120% 90% at 50% 0%, #bfe8ff 0%, #a5dcf5 40%, #8fcf6f 100%)}
+#overlay{background:rgba(20,32,40,.55);backdrop-filter:blur(4px)}
+.card{background:#fff;border-radius:22px;padding:26px 24px;max-width:440px;width:100%;
+  text-align:center;box-shadow:0 24px 60px rgba(10,30,50,.35);animation:cardIn .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes cardIn{from{transform:translateY(26px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+.card h1{font-size:44px;letter-spacing:1px;line-height:1.05}
+.card h2{font-size:30px}
+.card .sub{color:#6b7a84;font-weight:700;margin:4px 0 14px}
+.howto{text-align:left;background:#f2f6f8;border-radius:14px;padding:12px 14px;margin:12px 0 18px;font-size:14.5px;font-weight:700;color:#3c4c56}
+.howto div{display:flex;gap:9px;align-items:flex-start;padding:5px 0}
+.howto span{flex:0 0 auto}
+.howto p{margin:0;flex:1}
+.btn{font-family:inherit;font-weight:800;font-size:18px;border:0;cursor:pointer;color:#fff;
+  background:linear-gradient(180deg,#4f8bff,#2f6fed);border-radius:14px;padding:13px 22px;
+  box-shadow:0 5px 0 #1d4fb8, 0 10px 18px rgba(47,111,237,.35);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #1d4fb8}
+.btn.ghostb{background:#eef2f5;color:#3c4c56;box-shadow:0 5px 0 #cdd6dc}
+.btn.ghostb:active{box-shadow:0 2px 0 #cdd6dc}
+.btnrow{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.tiny{margin-top:14px;font-size:12px;color:#8a99a3;font-weight:700}
+.stars{font-size:52px;line-height:1;margin:8px 0 2px;letter-spacing:6px}
+.star{display:inline-block;color:#d9dee3;transform:scale(0);animation:starPop .5s cubic-bezier(.2,1.6,.4,1) forwards}
+.star.on{color:#ffc93c;text-shadow:0 3px 0 #e8a10c33, 0 0 18px #ffc93c66}
+@keyframes starPop{to{transform:scale(1)}}
+.stats{font-weight:800;color:#54646e;margin-top:6px}
+.endrow{display:flex;justify-content:space-between;font-weight:800;padding:7px 12px;background:#f2f6f8;border-radius:10px;margin:6px 0}
+.endrow .st{color:#ffc93c;letter-spacing:2px}
+
+/* ---------- Oyun düzeni ---------- */
+#game{display:flex;flex-direction:column;height:100dvh}
+#hud{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px;flex-wrap:wrap}
+.chip{background:#ffffffd9;border-radius:12px;padding:7px 12px;font-weight:800;
+  box-shadow:0 3px 8px rgba(20,50,70,.14);display:flex;align-items:center;gap:8px;font-size:15px}
+#lvlBadge{color:#2f6fed}
+#fuelBar{width:86px;height:9px;background:#e2e8ec;border-radius:6px;overflow:hidden}
+#fuelBar i{display:block;height:100%;width:100%;background:#58c25c;border-radius:6px;transition:width .25s, background .25s}
+#fuelBox.low{animation:lowPulse .7s infinite}
+@keyframes lowPulse{0%,100%{box-shadow:0 3px 8px rgba(20,50,70,.14)}50%{box-shadow:0 0 0 4px #ff5a5a55}}
+.bump{animation:bump .3s}
+@keyframes bump{40%{transform:scale(1.35)}}
+.iconbtn{border:0;background:#ffffffd9;border-radius:12px;width:40px;height:40px;font-size:19px;cursor:pointer;
+  box-shadow:0 3px 8px rgba(20,50,70,.14)}
+.iconbtn:active{transform:scale(.92)}
+
+#boardWrap{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 10px;min-height:0}
+#board{position:relative;border-radius:18px;overflow:hidden;
+  background:repeating-linear-gradient(90deg,var(--grass1) 0 46px,var(--grass2) 46px 92px);
+  box-shadow:0 18px 40px rgba(20,60,30,.35), inset 0 0 0 3px #ffffff44}
+
+/* hücreler (apron) */
+.cell{position:absolute;background:var(--apron);box-shadow:inset 0 0 0 1px #a9b4bb}
+.cell.hole{background:var(--apron2);box-shadow:inset 0 0 0 2px #8b969e, inset 0 4px 10px rgba(0,0,0,.28);}
+.cell.hole::after{content:'';position:absolute;inset:7%;border:2px dashed #7c878f;border-radius:10px;opacity:.7}
+
+/* parçalar */
+.tile{position:absolute;z-index:10;transition:transform .16s ease-out;will-change:transform}
+.tile .lift{width:100%;height:100%;transition:transform .15s, filter .15s}
+.tile .roadWrap{width:100%;height:100%;transition:transform .28s cubic-bezier(.3,1.3,.4,1)}
+.tile svg{display:block;width:100%;height:100%}
+.tile.movable{cursor:pointer}
+.tile.movable .lift{filter:drop-shadow(0 3px 5px rgba(0,0,0,.25))}
+.tile.movable:hover .lift{transform:translateY(-2px) scale(1.02);filter:drop-shadow(0 6px 9px rgba(0,0,0,.3)) brightness(1.06)}
+.tile.pickable{cursor:pointer}
+.tile.pickable .lift{animation:pickPulse .9s infinite}
+@keyframes pickPulse{0%,100%{filter:drop-shadow(0 0 2px #35e0ff)}50%{filter:drop-shadow(0 0 10px #35e0ff)}}
+.tile.dim .lift{filter:grayscale(.5) brightness(.75)}
+.tile.flying{transition:transform .4s cubic-bezier(.3,.8,.3,1);z-index:40}
+.tile.flying .lift{animation:flyPulse .4s}
+@keyframes flyPulse{50%{transform:scale(1.18)}}
+.tile.onpath .roadWrap{filter:drop-shadow(0 0 7px #ffe27a) brightness(1.13)}
+.lift.deny{animation:deny .3s}
+@keyframes deny{20%{transform:translateX(-5px)}50%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+.tile.poof .lift{animation:poof .32s forwards}
+@keyframes poof{to{transform:scale(.1) rotate(30deg);opacity:0}}
+
+/* parça rozetleri */
+.itemB{position:absolute;right:5%;bottom:5%;background:#fff;border-radius:999px;
+  padding:2% 8%;font-size:calc(var(--cell)*0.26);line-height:1.35;box-shadow:0 2px 5px rgba(0,0,0,.3);
+  animation:itemBob 1.6s ease-in-out infinite}
+@keyframes itemBob{50%{transform:translateY(-9%)}}
+.itemB.got{animation:gotIt .55s forwards}
+@keyframes gotIt{40%{transform:scale(1.7)}to{transform:scale(.2) translateY(-120%);opacity:0}}
+.rotB{position:absolute;left:6%;top:6%;width:26%;height:26%;background:#ff9f2e;color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*0.2);font-weight:800;
+  box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.fogCover{position:absolute;inset:2%;border-radius:16%;z-index:5;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#aeb9c2,#8d99a3);font-size:calc(var(--cell)*0.42);
+  box-shadow:inset 0 0 0 2px #ffffff55;transition:opacity .5s, transform .5s;pointer-events:none}
+.fogCover::after{content:'?';position:absolute;font-size:calc(var(--cell)*0.24);font-weight:800;color:#ffffffcc;
+  bottom:8%;right:12%}
+.fogCover.off{opacity:0;transform:scale(1.35)}
+
+/* hayalet (radar) */
+.ghost{position:absolute;z-index:30;border:3px dashed #2fd6ff;border-radius:14%;
+  animation:ghostPulse 1s infinite;pointer-events:none}
+@keyframes ghostPulse{50%{box-shadow:0 0 14px #2fd6ffaa, inset 0 0 10px #2fd6ff55}}
+.ghost.ok{border-color:#4cd964}
+.ghost.ok::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#4cd964;font-weight:800;font-size:calc(var(--cell)*0.4);text-shadow:0 1px 3px #0006}
+.ghost svg{width:100%;height:100%;opacity:.9}
+
+/* kapı & pist dekoru */
+#gateDecor,#runwayDecor{position:absolute;top:0;z-index:5}
+.gstrip{position:absolute;inset:0;background:var(--apron);box-shadow:inset -3px 0 8px rgba(0,0,0,.15)}
+.gbuild{position:absolute;left:6%;top:4%;bottom:4%;width:38%;background:#e9eef2;border-radius:8px;
+  box-shadow:inset 0 0 0 2px #c6d0d7;overflow:hidden}
+.gbuild::after{content:'';position:absolute;inset:10% 18%;
+  background:repeating-linear-gradient(0deg,#9fd2e8 0 9px,#e9eef2 9px 20px)}
+.glabel{position:absolute;left:8%;padding:2px 7px;background:#2f6fed;color:#fff;font-weight:800;
+  font-size:calc(var(--cell)*0.17);border-radius:7px;transform:translateY(-140%);white-space:nowrap;box-shadow:0 2px 5px #0004}
+.lead{position:absolute;height:5px;background:var(--line);border-radius:3px;box-shadow:0 0 5px #0003}
+.rwy{position:absolute;inset:0;background:#2e343b;box-shadow:inset 3px 0 8px rgba(0,0,0,.35)}
+.rcl{position:absolute;left:50%;top:0;bottom:0;width:5px;transform:translateX(-50%);
+  background:repeating-linear-gradient(0deg,#f2f4f6 0 16px,transparent 16px 30px)}
+.thr{position:absolute;left:8%;right:8%;height:14px;
+  background:repeating-linear-gradient(90deg,#f2f4f6 0 7px,transparent 7px 15px)}
+.thr.t{top:6px}.thr.b{bottom:6px}
+.rnum{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);color:#e8ecef;font-weight:800;
+  font-family:'Baloo 2';font-size:calc(var(--cell)*0.34);letter-spacing:2px}
+
+/* uçak */
+#plane{position:absolute;z-index:50;pointer-events:none;will-change:transform;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
+
+#fx{position:absolute;inset:0;z-index:60;pointer-events:none}
+
+/* booster çubuğu */
+#boosterBar{display:flex;gap:9px;justify-content:center;padding:10px 10px 14px;flex-wrap:wrap}
+.boost{position:relative;border:0;cursor:pointer;font-family:inherit;background:#ffffffd9;border-radius:14px;
+  padding:8px 13px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:74px;
+  box-shadow:0 4px 10px rgba(20,50,70,.16);transition:transform .08s, box-shadow .15s}
+.boost:active{transform:scale(.94)}
+.boost .bi{font-size:21px}
+.boost .bn{font-size:11px;font-weight:800;color:#54646e}
+.boost .bc{position:absolute;top:-7px;right:-6px;background:#ff5a5a;color:#fff;border-radius:999px;
+  min-width:21px;height:21px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;
+  box-shadow:0 2px 4px #0004}
+.boost.active{box-shadow:0 0 0 3px #2fd6ff, 0 4px 10px rgba(20,50,70,.16)}
+.boost:disabled{opacity:.42;cursor:default}
+
+/* toast */
+#toast{position:fixed;left:50%;top:74px;transform:translate(-50%,-14px);z-index:150;
+  background:#253238ee;color:#fff;font-weight:800;font-size:15px;padding:10px 18px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;box-shadow:0 8px 20px #0005;white-space:nowrap;max-width:94vw;text-overflow:ellipsis;overflow:hidden}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- BAŞLANGIÇ EKRANI -->
+  <div class="screen" id="startScreen">
+    <div class="card">
+      <div style="font-size:58px">🛫</div>
+      <h1>RUNWAY RUSH</h1>
+      <div class="sub">Taksi Yolu Bulmacası — Prototip</div>
+      <div class="howto">
+        <div><span>🧩</span><p>Parçaları boş hücreye kaydırarak <b>kapıdan piste</b> kesintisiz taksi yolu kur.</p></div>
+        <div><span>⛽</span><p>Her hamle <b>1 yakıt</b> harcar — yakıt bitmeden rotayı tamamla.</p></div>
+        <div><span>🧍</span><p>Rotayı yolcu ve bagajlardan geçir; <b>hepsini toplarsan 3 yıldız!</b></p></div>
+        <div><span>🚀</span><p>Zorda kalırsan alttaki <b>booster</b>'ları kullan.</p></div>
+      </div>
+      <button class="btn" id="startBtn">UÇUŞA BAŞLA 🛫</button>
+      <div class="tiny">Konsept: Runway_Rush_Muhammed (8/26) • Tek dosya HTML prototipi</div>
+    </div>
+  </div>
+
+  <!-- OYUN -->
+  <div id="game" class="hidden">
+    <header id="hud">
+      <div class="chip" id="lvlBadge">BÖLÜM 1/3</div>
+      <div class="chip" id="fuelBox">⛽ <b id="fuelNum">0</b><div id="fuelBar"><i></i></div></div>
+      <div class="chip">🧍 <b id="paxNum">0/0</b></div>
+      <div class="chip">🧳 <b id="bagNum">0/0</b></div>
+      <button class="iconbtn" id="muteBtn" title="Ses">🔊</button>
+      <button class="iconbtn" id="restartBtn" title="Bölümü yeniden başlat">🔁</button>
+    </header>
+    <div id="boardWrap">
+      <div id="board">
+        <div id="gateDecor"></div>
+        <div id="runwayDecor"></div>
+        <div id="gridLayer"></div>
+        <div id="tileLayer"></div>
+        <div id="ghostLayer"></div>
+        <div id="plane"></div>
+        <canvas id="fx"></canvas>
+      </div>
+    </div>
+    <footer id="boosterBar">
+      <button class="boost" data-k="tow"><span class="bi">🚚</span><span class="bn">Çekici</span><span class="bc">0</span></button>
+      <button class="boost" data-k="fuel"><span class="bi">⛽</span><span class="bn">Jet Fuel</span><span class="bc">0</span></button>
+      <button class="boost" data-k="radar"><span class="bi">📡</span><span class="bn">Radar</span><span class="bc">0</span></button>
+      <button class="boost" data-k="slot"><span class="bi">🕳️</span><span class="bn">Ekstra Boşluk</span><span class="bc">0</span></button>
+    </footer>
+  </div>
+
+  <div id="toast"></div>
+  <div class="screen hidden" id="overlay"><div class="card" id="overlayCard"></div></div>
+</div>
+<script>
+'use strict';
+/*__CORE__*/
+/* ---------- Saf oyun çekirdeği (DOM'suz; test edilebilir) ---------- */
+const N=1,E=2,S=4,W=8;
+const DIRV={1:[-1,0],2:[0,1],4:[1,0],8:[0,-1]};
+const OPP={1:4,4:1,2:8,8:2};
+const CHAR2MASK={'|':N|S,'-':E|W,'L':N|E,'F':E|S,'7':S|W,'J':W|N};
+const ROADD={
+  5:'M50,0 L50,100',
+  10:'M0,50 L100,50',
+  3:'M50,0 A50 50 0 0 0 100,50',
+  6:'M100,50 A50 50 0 0 0 50,100',
+  12:'M50,100 A50 50 0 0 0 0,50',
+  9:'M0,50 A50 50 0 0 0 50,0'
+};
+function rotCW(m){ return ((m<<1)&15) | (m>>3); }
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function starsFor(col,tot){ if(tot<=0) return 3; if(col>=tot) return 3; if(col>=Math.ceil(tot/2)) return 2; return 1; }
+
+const LEVELS=[
+  { name:'Eğitim Uçuşu', cols:4, rows:3, gateRow:1, runwayRow:1,
+    map:['.F7.','-JL-','..o.'],
+    items:[{r:0,c:1,t:'pax'},{r:1,c:3,t:'bag'}],
+    fog:[], rot:[], shuffle:8, fuel:12,
+    hint:'Boşluğa komşu parçalara dokunarak kaydır 👆' },
+  { name:'Aktarma', cols:5, rows:4, gateRow:2, runwayRow:1,
+    map:['.|.-.','.F-7F','-J.LJ','F.o.J'],
+    items:[{r:1,c:1,t:'pax'},{r:1,c:3,t:'bag'},{r:2,c:4,t:'pax'}],
+    fog:[], rot:[], shuffle:14, fuel:20,
+    hint:'Rotayı yolcuların ÜZERİNDEN geçir 🧍' },
+  { name:'Sisli Gece', cols:5, rows:4, gateRow:1, runwayRow:3,
+    map:['.|.Fo','-7...','.|-F7','.L-JL'],
+    items:[{r:2,c:1,t:'pax'},{r:3,c:2,t:'bag'},{r:2,c:3,t:'pax'},{r:3,c:4,t:'pax'}],
+    fog:[[1,1],[3,3],[2,4]], rot:[[0,3]], shuffle:18, fuel:25,
+    hint:'☁️ Sisli parçalar ilk kaydırışta açılır • ↻ döner parçalar her kaydırmada döner' }
+];
+
+function parseLevel(L){
+  const board=[], holes=[], tiles=[]; let id=0;
+  for(let r=0;r<L.rows;r++){
+    board.push([]);
+    for(let c=0;c<L.cols;c++){
+      const ch=L.map[r][c];
+      if(ch==='o'){ holes.push({r,c}); board[r].push(null); continue; }
+      const road=CHAR2MASK[ch]!==undefined;
+      const t={id:id++, r, c, road, mask:road?CHAR2MASK[ch]:0, deg:0, rot:false, fog:false, fogged:false, item:null};
+      board[r].push(t); tiles.push(t);
+    }
+  }
+  for(const it of L.items){ const t=board[it.r][it.c]; if(t) t.item={t:it.t}; }
+  for(const rc of L.rot){ const t=board[rc[0]][rc[1]]; if(t) t.rot=true; }
+  for(const rc of L.fog){ const t=board[rc[0]][rc[1]]; if(t) t.fog=true; }
+  return {board,holes,tiles};
+}
+
+/* Kapıdan piste yürüyerek rota doğrulama */
+function walkCore(board,cols,rows,gateRow,runwayRow){
+  let travel=E, cr=gateRow, cc=0;
+  const cells=[], seen=new Set();
+  while(true){
+    if(cr<0||cr>=rows||cc<0||cc>=cols) return {ok:false,cells};
+    const t=board[cr][cc];
+    if(!t||!t.road) return {ok:false,cells};
+    const enter=OPP[travel];
+    if(!(t.mask&enter)) return {ok:false,cells};
+    const exit=t.mask&~enter;
+    if(!exit||(exit&(exit-1))) return {ok:false,cells};
+    const key=cr+','+cc;
+    if(seen.has(key)) return {ok:false,cells};
+    seen.add(key);
+    cells.push({r:cr,c:cc,enter,exit,tile:t});
+    if(cc===cols-1 && exit===E && cr===runwayRow) return {ok:true,cells};
+    travel=exit;
+    cr+=DIRV[exit][0]; cc+=DIRV[exit][1];
+  }
+}
+
+/* Veri üzerinde tek kaydırma (oyun + karıştırma aynı kuralı kullanır) */
+function coreSlide(board,holes,t,h,noRot){
+  board[h.r][h.c]=t; board[t.r][t.c]=null;
+  const tr=t.r, tc=t.c;
+  t.r=h.r; t.c=h.c; h.r=tr; h.c=tc;
+  if(!noRot && t.rot && t.road){ t.mask=rotCW(t.mask); t.deg=(t.deg+90)%360; }
+}
+
+/* Çözülmüş dizilimden geriye doğru karıştırma → çözülebilirlik garantisi */
+function shuffleCore(board,holes,L,rand){
+  const moves=[]; let last=null, n=L.shuffle, guard=400;
+  const randomSlide=()=>{
+    const h=holes[Math.floor(rand()*holes.length)];
+    const cand=[];
+    for(const d of [N,E,S,W]){
+      const nr=h.r+DIRV[d][0], nc=h.c+DIRV[d][1];
+      if(nr<0||nr>=L.rows||nc<0||nc>=L.cols) continue;
+      const t=board[nr][nc];
+      if(t && t!==last) cand.push(t);
+    }
+    if(!cand.length){ last=null; return false; }
+    const t=cand[Math.floor(rand()*cand.length)];
+    moves.push({from:[t.r,t.c],to:[h.r,h.c]});
+    coreSlide(board,holes,t,h,false);
+    last=t; return true;
+  };
+  while(n>0 && guard-->0){ if(randomSlide()) n--; }
+  guard=60;
+  while(walkCore(board,L.cols,L.rows,L.gateRow,L.runwayRow).ok && guard-->0){ randomSlide(); }
+  return moves;
+}
+const CORE_API={N,E,S,W,DIRV,OPP,CHAR2MASK,ROADD,rotCW,mulberry32,starsFor,LEVELS,parseLevel,walkCore,coreSlide,shuffleCore};
+/*__END_CORE__*/
+
+/* ================== DOM & OYUN DURUMU ================== */
+const $=q=>document.querySelector(q);
+const boardEl=$('#board'), gridLayer=$('#gridLayer'), tileLayer=$('#tileLayer'),
+      ghostLayer=$('#ghostLayer'), planeEl=$('#plane'), fxEl=$('#fx'),
+      gateDecor=$('#gateDecor'), runwayDecor=$('#runwayDecor'),
+      toastEl=$('#toast'), overlayEl=$('#overlay'), overlayCard=$('#overlayCard');
+
+let G=null, mode=null, toastTimer=0, radarTimer=0;
+let inv={tow:2, fuel:2, radar:3, slot:1};
+let bestStars=[0,0,0];
+
+const PLANE_SVG=`<svg viewBox="-20 -20 40 40"><path fill="#ffffff" stroke="#37474f" stroke-width="1.3" stroke-linejoin="round"
+ d="M16,0 C16,-1.8 14,-2.4 12,-2.4 L4,-2.4 L-1,-13 L-5,-13 L-3,-2.4 L-10,-2.4 L-12,-6.5 L-14,-6.5 L-13,-2 C-15,-1.6 -15,1.6 -13,2 L-14,6.5 L-12,6.5 L-10,2.4 L-3,2.4 L-5,13 L-1,13 L4,2.4 L12,2.4 C14,2.4 16,1.8 16,0 Z"/>
+ <circle cx="12.6" cy="0" r="1.5" fill="#7fd4f2"/></svg>`;
+
+function roadSVG(mask,color,dash){
+  const d=ROADD[mask]; if(!d) return '';
+  if(color) return `<svg viewBox="0 0 100 100"><path d="${d}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${dash||'none'}"/></svg>`;
+  return `<svg viewBox="0 0 100 100">
+    <rect x="3" y="3" width="94" height="94" rx="14" fill="#39414b" stroke="#232830" stroke-width="2"/>
+    <path d="${d}" fill="none" stroke="#20262d" stroke-width="17" stroke-linecap="round"/>
+    <path d="${d}" fill="none" stroke="#f6c94a" stroke-width="7" stroke-linecap="round"/>
+  </svg>`;
+}
+function grassSVG(seed){
+  const p=[[30,35,5],[62,58,7],[44,76,4],[70,26,4]];
+  const dots=p.slice(0,2+(seed%3)).map(a=>`<circle cx="${a[0]}" cy="${a[1]}" r="${a[2]}" fill="#7ecf5b"/>`).join('');
+  return `<svg viewBox="0 0 100 100"><rect x="3" y="3" width="94" height="94" rx="14" fill="#6fbf4e" stroke="#57a83c" stroke-width="2"/>${dots}</svg>`;
+}
+
+/* ================== BÖLÜM KURULUMU ================== */
+function buildLevel(idx){
+  hideOverlay(); cancelMode(); clearGhost(); clearTimeout(radarTimer);
+  const L=LEVELS[idx];
+  const parsed=parseLevel(L);
+  const sol=walkCore(parsed.board,L.cols,L.rows,L.gateRow,L.runwayRow);
+  if(!sol.ok) console.warn('Seviye tasarımı hatalı!',idx);
+  const solution=sol.cells.map(c=>({r:c.r,c:c.c,mask:c.tile.mask}));
+  const rand=mulberry32((Date.now()^(performance.now()*1000))>>>0);
+  shuffleCore(parsed.board,parsed.holes,L,rand);
+  for(const t of parsed.tiles){ t.deg=0; if(t.fog) t.fogged=true; }
+  const tot={pax:0,bag:0};
+  for(const it of L.items) tot[it.t]++;
+  G={idx,L,board:parsed.board,holes:parsed.holes,tiles:parsed.tiles,
+     solution,fuel:L.fuel,maxFuel:L.fuel,tot,col:{pax:0,bag:0},
+     state:'idle',cell:64,gateW:60,runW:64,gx:70,radarOn:false,taxi:null,cellEls:[]};
+  makeBoardDOM();
+  layout();
+  hudUI();
+  $('#game').classList.remove('hidden');
+  showToast(`BÖLÜM ${idx+1} • ${L.name}`,1700);
+  if(L.hint) setTimeout(()=>{ if(G&&G.idx===idx&&G.state==='idle') showToast(L.hint,3000); },1900);
+}
+
+function makeBoardDOM(){
+  gridLayer.innerHTML=''; tileLayer.innerHTML=''; ghostLayer.innerHTML='';
+  const L=G.L;
+  G.cellEls=[];
+  for(let r=0;r<L.rows;r++){
+    G.cellEls.push([]);
+    for(let c=0;c<L.cols;c++){
+      const d=document.createElement('div');
+      d.className='cell';
+      gridLayer.appendChild(d);
+      G.cellEls[r].push(d);
+    }
+  }
+  for(const t of G.tiles){
+    const el=document.createElement('div');
+    el.className='tile';
+    let inner=t.road?roadSVG(t.mask):grassSVG(t.id);
+    let badges='';
+    if(t.rot) badges+=`<div class="rotB">↻</div>`;
+    if(t.item) badges+=`<div class="itemB">${t.item.t==='pax'?'🧍':'🧳'}</div>`;
+    if(t.fogged) badges+=`<div class="fogCover">☁️</div>`;
+    el.innerHTML=`<div class="lift"><div class="roadWrap">${inner}</div>${badges}</div>`;
+    el.addEventListener('click',()=>onTileTap(t));
+    t.el=el;
+    tileLayer.appendChild(el);
+  }
+  gateDecor.innerHTML=`<div class="gstrip"></div><div class="gbuild"></div><div class="lead" id="gLead"></div><div class="glabel" id="gLabel">GATE 1</div>`;
+  runwayDecor.innerHTML=`<div class="rwy"><div class="rcl"></div><div class="thr t"></div><div class="thr b"></div><span class="rnum">27</span><div class="lead" id="rLead"></div></div>`;
+  planeEl.innerHTML=PLANE_SVG;
+}
+
+/* ================== YERLEŞİM ================== */
+function layout(){
+  const L=G.L;
+  const availW=Math.max(300,window.innerWidth-24);
+  const availH=Math.max(240,window.innerHeight-185);
+  let cell=Math.floor(Math.min((availW-24)/(L.cols+2.0), availH/L.rows, 88));
+  cell=Math.max(cell,40);
+  G.cell=cell;
+  G.gateW=Math.round(cell*0.95);
+  G.runW=Math.round(cell*1.0);
+  G.gx=G.gateW+10;
+  const bw=G.gx+L.cols*cell+10+G.runW, bh=L.rows*cell;
+  boardEl.style.width=bw+'px'; boardEl.style.height=bh+'px';
+  boardEl.style.setProperty('--cell',cell+'px');
+  G.bw=bw; G.bh=bh;
+  fxEl.width=bw; fxEl.height=bh;
+  for(let r=0;r<L.rows;r++)for(let c=0;c<L.cols;c++){
+    const d=G.cellEls[r][c];
+    d.style.left=(G.gx+c*cell)+'px'; d.style.top=(r*cell)+'px';
+    d.style.width=cell+'px'; d.style.height=cell+'px';
+  }
+  for(const t of G.tiles){
+    t.el.style.width=cell+'px'; t.el.style.height=cell+'px';
+    place(t,true);
+    const rw=t.el.querySelector('.roadWrap');
+    if(rw) rw.style.transform=`rotate(${t.deg}deg)`;
+  }
+  gateDecor.style.left='0px'; gateDecor.style.width=G.gateW+'px'; gateDecor.style.height=bh+'px';
+  runwayDecor.style.left=(bw-G.runW)+'px'; runwayDecor.style.width=G.runW+'px'; runwayDecor.style.height=bh+'px';
+  const gLead=$('#gLead'), rLead=$('#rLead'), gLabel=$('#gLabel');
+  const gy=(L.gateRow+0.5)*cell, ry=(L.runwayRow+0.5)*cell;
+  gLead.style.top=(gy-2.5)+'px'; gLead.style.left=Math.round(G.gateW*0.45)+'px'; gLead.style.width=(G.gateW*0.55+10)+'px';
+  gLabel.style.top=gy+'px';
+  rLead.style.top=(ry-2.5)+'px'; rLead.style.left='-10px'; rLead.style.width=(10+G.runW/2)+'px';
+  const ps=Math.round(cell*0.8);
+  planeEl.style.width=ps+'px'; planeEl.style.height=ps+'px';
+  if(G.state==='idle'||G.state==='failed') parkPlane();
+  updateMovables();
+}
+function place(t,instant){
+  const x=G.gx+t.c*G.cell, y=t.r*G.cell;
+  if(instant){ t.el.style.transition='none'; }
+  t.el.style.transform=`translate(${x}px,${y}px)`;
+  if(instant){ void t.el.offsetWidth; t.el.style.transition=''; }
+}
+function parkPlane(){
+  setPlane(G.gateW*0.42,(G.L.gateRow+0.5)*G.cell,0,1,1);
+}
+function setPlane(x,y,deg,scale,alpha){
+  const s=parseFloat(planeEl.style.width)||G.cell*0.8;
+  planeEl.style.transform=`translate(${x-s/2}px,${y-s/2}px) rotate(${deg}deg) scale(${scale})`;
+  planeEl.style.opacity=alpha;
+}
+
+/* ================== HUD ================== */
+function hudUI(){
+  $('#lvlBadge').textContent=`BÖLÜM ${G.idx+1}/${LEVELS.length}`;
+  fuelUI(); cargoUI(); updateBoosterBar();
+}
+function fuelUI(){
+  const n=$('#fuelNum'); n.textContent=G.fuel;
+  n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump');
+  const pct=Math.max(0,G.fuel/G.maxFuel*100);
+  const bar=$('#fuelBar i'); bar.style.width=pct+'%';
+  bar.style.background=pct>50?'#58c25c':(pct>25?'#f5a623':'#ff5a5a');
+  $('#fuelBox').classList.toggle('low',G.fuel<=3);
+}
+function cargoUI(){
+  const p=$('#paxNum'), b=$('#bagNum');
+  p.textContent=`${G.col.pax}/${G.tot.pax}`; b.textContent=`${G.col.bag}/${G.tot.bag}`;
+  for(const el of [p,b]){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+}
+function showToast(txt,ms){
+  toastEl.textContent=txt; toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastEl.classList.remove('show'),ms||1500);
+}
+
+/* ================== HAREKET / GİRDİ ================== */
+function adjacentHole(t){
+  for(const h of G.holes){
+    if(Math.abs(h.r-t.r)+Math.abs(h.c-t.c)===1) return h;
+  }
+  return null;
+}
+function updateMovables(){
+  for(const t of G.tiles){
+    t.el.classList.toggle('movable', G.state==='idle' && !mode && !!adjacentHole(t));
+  }
+  const L=G.L;
+  for(let r=0;r<L.rows;r++)for(let c=0;c<L.cols;c++)
+    G.cellEls[r][c].classList.toggle('hole', !G.board[r][c]);
+}
+function onTileTap(t){
+  if(!G||G.state!=='idle') return;
+  if(mode==='tow'){ towPick(t); return; }
+  if(mode==='slot'){ slotPick(t); return; }
+  const h=adjacentHole(t);
+  if(!h){ denyAnim(t); sfxDeny(); return; }
+  doSlide(t,h,{});
+}
+function denyAnim(t){
+  const l=t.el.querySelector('.lift');
+  l.classList.remove('deny'); void l.offsetWidth; l.classList.add('deny');
+  setTimeout(()=>l.classList.remove('deny'),320);
+}
+function doSlide(t,h,opts){
+  const wasFog=t.fogged;
+  coreSlide(G.board,G.holes,t,h,!!opts.noRot);
+  if(wasFog){
+    t.fogged=false;
+    const fc=t.el.querySelector('.fogCover');
+    if(fc){ fc.classList.add('off'); setTimeout(()=>fc.remove(),520); }
+  }
+  const rw=t.el.querySelector('.roadWrap');
+  if(rw) rw.style.transform=`rotate(${t.deg}deg)`;
+  if(opts.fly){
+    t.el.classList.add('flying');
+    setTimeout(()=>t.el.classList.remove('flying'),430);
+  }
+  place(t);
+  if(!opts.free){ G.fuel--; fuelUI(); sfxSlide(); }
+  updateMovables();
+  const wait=opts.fly?440:190;
+  setTimeout(()=>{
+    if(!G||G.state!=='idle') return;
+    const res=walkCore(G.board,G.L.cols,G.L.rows,G.L.gateRow,G.L.runwayRow);
+    if(res.ok){ startTaxi(res); }
+    else if(G.fuel<=0){ failLevel(); }
+  },wait);
+}
+window.addEventListener('keydown',e=>{
+  if(!G) return;
+  if(e.key==='Escape'){ cancelMode(); return; }
+  if(G.state!=='idle') return;
+  const km={ArrowLeft:E,ArrowRight:W,ArrowUp:S,ArrowDown:N};
+  if(km[e.key]){
+    e.preventDefault();
+    for(const h of G.holes){
+      const nr=h.r+DIRV[km[e.key]][0], nc=h.c+DIRV[km[e.key]][1];
+      if(nr<0||nr>=G.L.rows||nc<0||nc>=G.L.cols) continue;
+      const t=G.board[nr][nc];
+      if(t && !mode){ doSlide(t,h,{}); break; }
+    }
+  }
+  if(e.key==='r'||e.key==='R') restartLevel();
+  const bk={'1':'tow','2':'fuel','3':'radar','4':'slot'};
+  if(bk[e.key]) useBooster(bk[e.key]);
+});
+function restartLevel(){
+  if(!G) return;
+  if(G.state==='taxi'){ showToast('Uçak takside! ✈️'); return; }
+  buildLevel(G.idx);
+}
+
+/* ================== TAKSİ & KALKIŞ ================== */
+function arcPoints(cx,cy,r,a0,a1,n,out){
+  let d=a1-a0;
+  while(d>Math.PI)d-=Math.PI*2;
+  while(d<-Math.PI)d+=Math.PI*2;
+  for(let i=1;i<=n;i++){
+    const a=a0+d*i/n;
+    pushPt(out,[cx+r*Math.cos(a), cy+r*Math.sin(a)]);
+  }
+}
+function pushPt(arr,p){
+  const l=arr[arr.length-1];
+  if(l && Math.hypot(l[0]-p[0],l[1]-p[1])<0.6) return;
+  arr.push(p);
+}
+function edgeMid(d,x0,y0,cell){
+  if(d===N) return [x0+cell/2,y0];
+  if(d===S) return [x0+cell/2,y0+cell];
+  if(d===E) return [x0+cell,y0+cell/2];
+  return [x0,y0+cell/2];
+}
+function tileSamples(cell,enter,exit,x0,y0,out){
+  const a=edgeMid(enter,x0,y0,cell), b=edgeMid(exit,x0,y0,cell);
+  if(enter===OPP[exit]){
+    for(let i=0;i<=6;i++) pushPt(out,[a[0]+(b[0]-a[0])*i/6, a[1]+(b[1]-a[1])*i/6]);
+    return;
+  }
+  const both=enter|exit;
+  const cx=(both&E)?x0+cell:x0, cy=(both&S)?y0+cell:y0;
+  pushPt(out,a);
+  arcPoints(cx,cy,cell/2, Math.atan2(a[1]-cy,a[0]-cx), Math.atan2(b[1]-cy,b[0]-cx), 10, out);
+}
+function startTaxi(res){
+  G.state='taxi'; cancelMode(); clearGhost();
+  for(const c of res.cells) c.tile.el.classList.add('onpath');
+  updateMovables(); sfxConfirm(); showToast('ROTA ONAYLANDI ✈️',1300);
+  const cell=G.cell, L=G.L;
+  const P=[];
+  pushPt(P,[G.gateW*0.42,(L.gateRow+0.5)*cell]);
+  pushPt(P,[G.gx,(L.gateRow+0.5)*cell]);
+  const marks=[];
+  for(const ci of res.cells){
+    const before=P.length;
+    tileSamples(cell,ci.enter,ci.exit,G.gx+ci.c*cell,ci.r*cell,P);
+    marks.push({tile:ci.tile, idx:before+Math.max(0,Math.floor((P.length-before)/2))});
+  }
+  const ry=(L.runwayRow+0.5)*cell;
+  const RX=G.bw-G.runW/2, r=cell*0.55;
+  pushPt(P,[G.gx+L.cols*cell,ry]);
+  pushPt(P,[RX-r,ry]);
+  arcPoints(RX-r,ry-r,r, Math.PI/2, 0, 9, P);
+  const liftIdx=P.length-1;
+  pushPt(P,[RX,-cell*1.5]);
+  const cum=[0];
+  for(let i=1;i<P.length;i++) cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
+  G.taxi={P,cum,marks:marks.map(m=>({tile:m.tile,d:cum[Math.min(m.idx,cum.length-1)]})),
+          mi:0,d:0,si:0,head:0,total:cum[cum.length-1],
+          lift:cum[liftIdx]+cell*0.5,spd:cell*3.0,last:0,lifted:false};
+  setTimeout(()=>{ engineStart(); requestAnimationFrame(stepTaxi); },620);
+}
+function stepTaxi(ts){
+  const T=G&&G.taxi; if(!T) return;
+  if(!T.last) T.last=ts;
+  const dt=Math.min(40,ts-T.last)/1000; T.last=ts;
+  let mult=1, scale=1, alpha=1;
+  if(T.d>T.lift){
+    const k=Math.min(1,(T.d-T.lift)/(G.cell*2.4));
+    mult=1+2.8*k*k; scale=1+0.85*k;
+    alpha=1-Math.max(0,(k-0.55))/0.45;
+    if(!T.lifted){ T.lifted=true; engineLift(); }
+  }
+  T.d+=T.spd*mult*dt;
+  while(T.mi<T.marks.length && T.d>=T.marks[T.mi].d){ collectTile(T.marks[T.mi].tile); T.mi++; }
+  while(T.si<T.cum.length-2 && T.cum[T.si+1]<T.d) T.si++;
+  const a=T.P[T.si], b=T.P[T.si+1];
+  const seg=T.cum[T.si+1]-T.cum[T.si]||1;
+  const f=Math.min(1,Math.max(0,(T.d-T.cum[T.si])/seg));
+  const x=a[0]+(b[0]-a[0])*f, y=a[1]+(b[1]-a[1])*f;
+  const target=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;
+  let dh=target-T.head;
+  while(dh>180)dh-=360; while(dh<-180)dh+=360;
+  T.head+=dh*Math.min(1,dt*9);
+  planeEl.style.filter=`drop-shadow(0 ${3+16*(scale-1)}px ${3+9*(scale-1)}px rgba(0,0,0,${Math.max(.12,.35-.2*(scale-1))}))`;
+  setPlane(x,y,T.head,scale,Math.max(0,alpha));
+  if(T.d>=T.total){ G.taxi=null; engineStop(); winLevel(); return; }
+  requestAnimationFrame(stepTaxi);
+}
+function collectTile(t){
+  if(!t.item) return;
+  const it=t.item; t.item=null;
+  G.col[it.t]++;
+  const b=t.el.querySelector('.itemB');
+  if(b){ b.classList.add('got'); setTimeout(()=>b.remove(),620); }
+  cargoUI(); sfxDing();
+}
+
+/* ================== KAZANMA / KAYBETME ================== */
+function winLevel(){
+  G.state='won';
+  const tot=G.tot.pax+G.tot.bag, col=G.col.pax+G.col.bag;
+  const s=starsFor(col,tot);
+  bestStars[G.idx]=Math.max(bestStars[G.idx],s);
+  confetti(); sfxWin();
+  setTimeout(()=>showWinOverlay(s),1150);
+}
+function showWinOverlay(s){
+  const last=G.idx===LEVELS.length-1;
+  overlayHTML(`
+    <h2>BÖLÜM TAMAMLANDI! 🛫</h2>
+    <div class="stars">${[1,2,3].map(i=>`<span class="star${i<=s?' on':''}" style="animation-delay:${.15+i*0.18}s">★</span>`).join('')}</div>
+    <p class="stats">🧍 ${G.col.pax}/${G.tot.pax} &nbsp;•&nbsp; 🧳 ${G.col.bag}/${G.tot.bag} &nbsp;•&nbsp; ⛽ ${G.fuel} kaldı</p>
+    ${s<3?'<p class="stats" style="font-size:13px;color:#8a99a3">3 yıldız için rotayı TÜM yolcu ve bagajlardan geçir!</p>':''}
+    <div class="btnrow">
+      <button class="btn ghostb" id="obRetry">🔁 Tekrar</button>
+      <button class="btn" id="obNext">${last?'🏆 Sonuçlar':'Sonraki Bölüm ▶'}</button>
+    </div>`);
+  $('#obRetry').onclick=()=>buildLevel(G.idx);
+  $('#obNext').onclick=()=>{ last?showEnd():buildLevel(G.idx+1); };
+}
+function showEnd(){
+  const total=bestStars.reduce((a,b)=>a+b,0);
+  overlayHTML(`
+    <div style="font-size:52px">🏆</div>
+    <h2>PROTOTİP TAMAMLANDI!</h2>
+    <p class="sub">Toplam ${total}/${LEVELS.length*3} yıldız</p>
+    ${LEVELS.map((L,i)=>`<div class="endrow"><span>Bölüm ${i+1} • ${L.name}</span><span class="st">${'★'.repeat(bestStars[i])}${'☆'.repeat(3-bestStars[i])}</span></div>`).join('')}
+    <div class="btnrow"><button class="btn" id="obAgain">🔁 Baştan Oyna</button></div>`);
+  $('#obAgain').onclick=()=>{ bestStars=[0,0,0]; inv={tow:2,fuel:2,radar:3,slot:1}; buildLevel(0); };
+}
+function failLevel(){
+  G.state='failed'; sfxFail();
+  setTimeout(()=>{
+    overlayHTML(`
+      <div style="font-size:52px">⛽</div>
+      <h2>YAKIT BİTTİ!</h2>
+      <p class="sub">Uçak piste ulaşamadan yakıt tükendi.</p>
+      <div class="btnrow">
+        <button class="btn ghostb" id="obRetry2">🔁 Tekrar Dene</button>
+        ${inv.fuel>0?`<button class="btn" id="obJet">⛽ Jet Fuel Kullan (${inv.fuel})</button>`:''}
+      </div>`);
+    $('#obRetry2').onclick=()=>buildLevel(G.idx);
+    const j=$('#obJet');
+    if(j) j.onclick=()=>{ inv.fuel--; G.fuel+=5; G.state='idle'; hideOverlay(); fuelUI(); updateBoosterBar(); updateMovables(); sfxFuel(); showToast('+5 Yakıt ⛽'); };
+  },420);
+}
+function overlayHTML(html){ overlayCard.innerHTML=html; overlayEl.classList.remove('hidden'); }
+function hideOverlay(){ overlayEl.classList.add('hidden'); }
+
+/* ================== BOOSTER'LAR ================== */
+function useBooster(k){
+  if(!G||G.state!=='idle') return;
+  if(mode===k){ cancelMode(); return; }
+  if(inv[k]<=0){ showToast('Bu booster tükendi 😕'); return; }
+  if(k==='fuel'){ inv.fuel--; G.fuel+=5; fuelUI(); updateBoosterBar(); sfxFuel(); showToast('+5 Yakıt ⛽'); return; }
+  if(k==='radar'){ doRadar(); return; }
+  if(k==='tow'){ setMode('tow'); showToast('Taşınacak parçayı seç 🚚',2200); return; }
+  if(k==='slot'){
+    if(!G.tiles.some(t=>!t.road)){ showToast('Kaldırılacak çim parçası yok 🌿'); return; }
+    setMode('slot'); showToast('Kaldırılacak ÇİM parçasını seç 🕳️',2200); return;
+  }
+}
+function setMode(k){
+  mode=k;
+  document.querySelectorAll('.boost').forEach(b=>b.classList.toggle('active',b.dataset.k===k));
+  for(const t of G.tiles){
+    const pick = k==='tow' ? true : (k==='slot' ? !t.road : false);
+    t.el.classList.toggle('pickable',!!k&&pick);
+    t.el.classList.toggle('dim',!!k&&!pick);
+  }
+  updateMovables();
+}
+function cancelMode(){ if(mode) setMode(null); mode=null;
+  document.querySelectorAll('.boost').forEach(b=>b.classList.remove('active'));
+  if(G) for(const t of G.tiles){ t.el.classList.remove('pickable'); t.el.classList.remove('dim'); }
+}
+function towPick(t){
+  const h=G.holes[0];
+  inv.tow--; cancelMode(); updateBoosterBar(); sfxTow();
+  doSlide(t,h,{free:true,fly:true,noRot:true});
+  showToast('Çekici parçayı taşıdı 🚚');
+}
+function slotPick(t){
+  if(t.road){ denyAnim(t); showToast('Sadece çim parçaları kaldırılabilir 🌿'); return; }
+  inv.slot--; cancelMode(); updateBoosterBar(); sfxPoof();
+  t.el.classList.add('poof');
+  const r=t.r,c=t.c;
+  setTimeout(()=>{ t.el.remove(); },330);
+  G.board[r][c]=null;
+  G.tiles=G.tiles.filter(x=>x!==t);
+  G.holes.push({r,c});
+  updateMovables();
+  showToast('Ekstra boşluk açıldı 🕳️');
+}
+function doRadar(){
+  if(G.radarOn) return;
+  inv.radar--; updateBoosterBar(); G.radarOn=true; sfxRadar();
+  showToast('RADAR: çözüm rotası gösteriliyor 📡',2800);
+  for(const s of G.solution){
+    const g=document.createElement('div');
+    g.className='ghost';
+    const cur=G.board[s.r][s.c];
+    if(cur&&cur.road&&cur.mask===s.mask){ g.classList.add('ok'); }
+    else{ g.innerHTML=roadSVG(s.mask,'#2fd6ff','14 9'); }
+    g.style.left=(G.gx+s.c*G.cell)+'px'; g.style.top=(s.r*G.cell)+'px';
+    g.style.width=G.cell+'px'; g.style.height=G.cell+'px';
+    ghostLayer.appendChild(g);
+  }
+  radarTimer=setTimeout(()=>{ clearGhost(); if(G) G.radarOn=false; },3000);
+}
+function clearGhost(){ ghostLayer.innerHTML=''; if(G) G.radarOn=false; }
+function updateBoosterBar(){
+  document.querySelectorAll('.boost').forEach(b=>{
+    const k=b.dataset.k;
+    b.querySelector('.bc').textContent=inv[k];
+    b.disabled=inv[k]<=0&&mode!==k;
+  });
+}
+
+/* ================== KONFETİ ================== */
+function confetti(){
+  const ctx=fxEl.getContext('2d');
+  const cols=['#f6c94a','#ff6b6b','#4ecdc4','#5b8cff','#b07df2','#ffffff'];
+  const parts=[];
+  for(let i=0;i<90;i++) parts.push({
+    x:Math.random()*G.bw, y:-20-Math.random()*60,
+    vx:(Math.random()-0.5)*130, vy:70+Math.random()*160,
+    rot:Math.random()*6.3, vr:(Math.random()-0.5)*9,
+    w:5+Math.random()*6, h:3+Math.random()*4,
+    col:cols[i%cols.length]
+  });
+  let last=performance.now();
+  const t0=last;
+  (function loop(ts){
+    const dt=Math.min(40,ts-last)/1000; last=ts;
+    ctx.clearRect(0,0,G.bw,G.bh);
+    let alive=false;
+    for(const p of parts){
+      p.vy+=290*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.rot+=p.vr*dt;
+      if(p.y<G.bh+20) alive=true;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle=p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    }
+    if(alive && ts-t0<3000) requestAnimationFrame(loop);
+    else ctx.clearRect(0,0,G.bw,G.bh);
+  })(last);
+}
+
+/* ================== SES ================== */
+let AC=null, muted=false, engOsc=null, engGain=null;
+function ac(){
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+function tone(f,d,type,v,delay,f2){
+  if(muted) return;
+  try{
+    const a=ac(), o=a.createOscillator(), g=a.createGain(), t=a.currentTime+(delay||0);
+    o.type=type||'sine'; o.frequency.setValueAtTime(f,t);
+    if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    g.gain.setValueAtTime(v||.2,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g).connect(a.destination);
+    o.start(t); o.stop(t+d+.03);
+  }catch(e){}
+}
+const sfxSlide=()=>{tone(150,.07,'triangle',.28);tone(95,.09,'sine',.18)};
+const sfxDeny=()=>tone(110,.14,'square',.12);
+const sfxDing=()=>{tone(880,.1,'sine',.24);tone(1318,.16,'sine',.2,.08)};
+const sfxConfirm=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.12,'triangle',.2,i*.07));
+const sfxWin=()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.17,'triangle',.22,i*.09));
+const sfxFail=()=>[330,262,196].forEach((f,i)=>tone(f,.22,'sawtooth',.14,i*.16));
+const sfxFuel=()=>tone(380,.25,'sine',.2,0,820);
+const sfxTow=()=>tone(220,.3,'sawtooth',.1,0,95);
+const sfxPoof=()=>tone(520,.25,'sine',.14,0,90);
+const sfxRadar=()=>{tone(1250,.09,'sine',.14);tone(1250,.09,'sine',.1,.24);tone(1250,.09,'sine',.07,.48)};
+function engineStart(){
+  if(muted) return;
+  try{
+    const a=ac();
+    engOsc=a.createOscillator(); engGain=a.createGain();
+    engOsc.type='sawtooth'; engOsc.frequency.value=68;
+    engGain.gain.value=.035;
+    engOsc.connect(engGain).connect(a.destination);
+    engOsc.start();
+  }catch(e){}
+}
+function engineLift(){
+  if(!engOsc) { return; }
+  try{
+    const t=ac().currentTime;
+    engOsc.frequency.exponentialRampToValueAtTime(230,t+1.1);
+    engGain.gain.setValueAtTime(.07,t);
+    engGain.gain.exponentialRampToValueAtTime(.001,t+1.4);
+    const o=engOsc;
+    setTimeout(()=>{try{o.stop()}catch(e){} if(engOsc===o){engOsc=null;engGain=null;}},1500);
+  }catch(e){}
+}
+function engineStop(){
+  if(engOsc){ try{engOsc.stop()}catch(e){} engOsc=null; engGain=null; }
+}
+
+/* ================== BAŞLATMA ================== */
+$('#startBtn').addEventListener('click',()=>{
+  ac();
+  $('#startScreen').classList.add('hidden');
+  buildLevel(0);
+});
+$('#restartBtn').addEventListener('click',restartLevel);
+$('#muteBtn').addEventListener('click',()=>{
+  muted=!muted;
+  $('#muteBtn').textContent=muted?'🔇':'🔊';
+  if(muted) engineStop();
+});
+document.querySelectorAll('.boost').forEach(b=>b.addEventListener('click',()=>useBooster(b.dataset.k)));
+window.addEventListener('resize',()=>{ if(G&&G.state!=='taxi') layout(); });
+</script>
+</body>
+</html>

@@ -48,18 +48,18 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
 .star.on{color:#ffc93c;text-shadow:0 3px 0 #e8a10c33, 0 0 18px #ffc93c66}
 @keyframes starPop{to{transform:scale(1)}}
 .stats{font-weight:800;color:#54646e;margin-top:6px}
-.endrow{display:flex;justify-content:space-between;font-weight:800;padding:7px 12px;background:#f2f6f8;border-radius:10px;margin:6px 0}
+.endrow{display:flex;justify-content:space-between;font-weight:800;padding:7px 12px;background:#f2f6f8;border-radius:10px;margin:6px 0;font-size:14px}
 .endrow .st{color:#ffc93c;letter-spacing:2px}
 
 /* ---------- Oyun düzeni ---------- */
 #game{display:flex;flex-direction:column;height:100dvh}
-#hud{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px;flex-wrap:wrap}
-.chip{background:#ffffffd9;border-radius:12px;padding:7px 12px;font-weight:800;
-  box-shadow:0 3px 8px rgba(20,50,70,.14);display:flex;align-items:center;gap:8px;font-size:15px}
+#hud{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 10px;flex-wrap:wrap}
+.chip{background:#ffffffd9;border-radius:12px;padding:7px 11px;font-weight:800;
+  box-shadow:0 3px 8px rgba(20,50,70,.14);display:flex;align-items:center;gap:7px;font-size:15px}
 #lvlBadge{color:#2f6fed}
-#fuelBar{width:86px;height:9px;background:#e2e8ec;border-radius:6px;overflow:hidden}
-#fuelBar i{display:block;height:100%;width:100%;background:#58c25c;border-radius:6px;transition:width .25s, background .25s}
-#fuelBox.low{animation:lowPulse .7s infinite}
+#timeBar{width:74px;height:9px;background:#e2e8ec;border-radius:6px;overflow:hidden}
+#timeBar i{display:block;height:100%;width:100%;background:#58c25c;border-radius:6px;transition:width .25s, background .25s}
+#timeBox.low{animation:lowPulse .7s infinite}
 @keyframes lowPulse{0%,100%{box-shadow:0 3px 8px rgba(20,50,70,.14)}50%{box-shadow:0 0 0 4px #ff5a5a55}}
 .bump{animation:bump .3s}
 @keyframes bump{40%{transform:scale(1.35)}}
@@ -67,9 +67,9 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
   box-shadow:0 3px 8px rgba(20,50,70,.14)}
 .iconbtn:active{transform:scale(.92)}
 
-#boardWrap{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 10px;min-height:0}
+#boardWrap{flex:1;display:flex;align-items:center;justify-content:center;padding:4px 10px;min-height:0}
 #board{position:relative;border-radius:18px;overflow:hidden;
-  background:repeating-linear-gradient(90deg,var(--grass1) 0 46px,var(--grass2) 46px 92px);
+  background:repeating-linear-gradient(0deg,var(--grass1) 0 46px,var(--grass2) 46px 92px);
   box-shadow:0 18px 40px rgba(20,60,30,.35), inset 0 0 0 3px #ffffff44}
 
 /* hücreler (apron) */
@@ -105,6 +105,8 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
 @keyframes itemBob{50%{transform:translateY(-9%)}}
 .itemB.got{animation:gotIt .55s forwards}
 @keyframes gotIt{40%{transform:scale(1.7)}to{transform:scale(.2) translateY(-120%);opacity:0}}
+.itemB.missed{animation:missedPulse .5s 3}
+@keyframes missedPulse{50%{box-shadow:0 0 0 5px #ff5a5acc;transform:scale(1.28)}}
 .rotB{position:absolute;left:6%;top:6%;width:26%;height:26%;background:#ff9f2e;color:#fff;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*0.2);font-weight:800;
   box-shadow:0 2px 4px rgba(0,0,0,.3)}
@@ -124,24 +126,24 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
   color:#4cd964;font-weight:800;font-size:calc(var(--cell)*0.4);text-shadow:0 1px 3px #0006}
 .ghost svg{width:100%;height:100%;opacity:.9}
 
-/* kapı & pist dekoru */
-#gateDecor,#runwayDecor{position:absolute;top:0;z-index:5}
-.gstrip{position:absolute;inset:0;background:var(--apron);box-shadow:inset -3px 0 8px rgba(0,0,0,.15)}
-.gbuild{position:absolute;left:6%;top:4%;bottom:4%;width:38%;background:#e9eef2;border-radius:8px;
+/* kapı (altta) & pist (üstte) dekoru */
+#gateDecor,#runwayDecor{position:absolute;left:0;z-index:5}
+.gstrip{position:absolute;inset:0;background:var(--apron);box-shadow:inset 0 3px 8px rgba(0,0,0,.15)}
+.gbuild{position:absolute;left:4%;right:4%;bottom:6%;height:42%;background:#e9eef2;border-radius:8px;
   box-shadow:inset 0 0 0 2px #c6d0d7;overflow:hidden}
-.gbuild::after{content:'';position:absolute;inset:10% 18%;
-  background:repeating-linear-gradient(0deg,#9fd2e8 0 9px,#e9eef2 9px 20px)}
-.glabel{position:absolute;left:8%;padding:2px 7px;background:#2f6fed;color:#fff;font-weight:800;
-  font-size:calc(var(--cell)*0.17);border-radius:7px;transform:translateY(-140%);white-space:nowrap;box-shadow:0 2px 5px #0004}
-.lead{position:absolute;height:5px;background:var(--line);border-radius:3px;box-shadow:0 0 5px #0003}
-.rwy{position:absolute;inset:0;background:#2e343b;box-shadow:inset 3px 0 8px rgba(0,0,0,.35)}
-.rcl{position:absolute;left:50%;top:0;bottom:0;width:5px;transform:translateX(-50%);
-  background:repeating-linear-gradient(0deg,#f2f4f6 0 16px,transparent 16px 30px)}
-.thr{position:absolute;left:8%;right:8%;height:14px;
-  background:repeating-linear-gradient(90deg,#f2f4f6 0 7px,transparent 7px 15px)}
-.thr.t{top:6px}.thr.b{bottom:6px}
-.rnum{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);color:#e8ecef;font-weight:800;
-  font-family:'Baloo 2';font-size:calc(var(--cell)*0.34);letter-spacing:2px}
+.gbuild::after{content:'';position:absolute;inset:18% 8%;
+  background:repeating-linear-gradient(90deg,#9fd2e8 0 9px,#e9eef2 9px 20px)}
+.glabel{position:absolute;padding:2px 8px;background:#2f6fed;color:#fff;font-weight:800;
+  font-size:calc(var(--cell)*0.17);border-radius:7px;transform:translate(-50%,-135%);white-space:nowrap;box-shadow:0 2px 5px #0004}
+.lead{position:absolute;width:5px;background:var(--line);border-radius:3px;box-shadow:0 0 5px #0003}
+.rwy{position:absolute;inset:0;background:#2e343b;box-shadow:inset 0 -3px 8px rgba(0,0,0,.35)}
+.rcl{position:absolute;top:50%;left:8px;right:8px;height:5px;transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,#f2f4f6 0 16px,transparent 16px 30px)}
+.thr{position:absolute;top:8%;bottom:8%;width:13px;
+  background:repeating-linear-gradient(0deg,#f2f4f6 0 7px,transparent 7px 15px)}
+.thr.l{left:6px}.thr.r{right:6px}
+.rnum{position:absolute;top:50%;transform:translateY(-50%);color:#e8ecef;font-weight:800;
+  font-family:'Baloo 2';font-size:calc(var(--cell)*0.32);letter-spacing:2px}
 
 /* uçak */
 #plane{position:absolute;z-index:50;pointer-events:none;will-change:transform;
@@ -150,9 +152,9 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
 #fx{position:absolute;inset:0;z-index:60;pointer-events:none}
 
 /* booster çubuğu */
-#boosterBar{display:flex;gap:9px;justify-content:center;padding:10px 10px 14px;flex-wrap:wrap}
+#boosterBar{display:flex;gap:9px;justify-content:center;padding:8px 10px 13px;flex-wrap:wrap}
 .boost{position:relative;border:0;cursor:pointer;font-family:inherit;background:#ffffffd9;border-radius:14px;
-  padding:8px 13px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:74px;
+  padding:8px 12px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:72px;
   box-shadow:0 4px 10px rgba(20,50,70,.16);transition:transform .08s, box-shadow .15s}
 .boost:active{transform:scale(.94)}
 .boost .bi{font-size:21px}
@@ -164,8 +166,8 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
 .boost:disabled{opacity:.42;cursor:default}
 
 /* toast */
-#toast{position:fixed;left:50%;top:74px;transform:translate(-50%,-14px);z-index:150;
-  background:#253238ee;color:#fff;font-weight:800;font-size:15px;padding:10px 18px;border-radius:999px;
+#toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-14px);z-index:150;
+  background:#253238ee;color:#fff;font-weight:800;font-size:14.5px;padding:10px 17px;border-radius:999px;
   opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;box-shadow:0 8px 20px #0005;white-space:nowrap;max-width:94vw;text-overflow:ellipsis;overflow:hidden}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 </style>
@@ -178,11 +180,11 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
     <div class="card">
       <div style="font-size:58px">🛫</div>
       <h1>RUNWAY RUSH</h1>
-      <div class="sub">Taksi Yolu Bulmacası — Prototip</div>
+      <div class="sub">Taksi Yolu Bulmacası — Prototip v0.2</div>
       <div class="howto">
-        <div><span>🧩</span><p>Parçaları boş hücreye kaydırarak <b>kapıdan piste</b> kesintisiz taksi yolu kur.</p></div>
-        <div><span>⛽</span><p>Her hamle <b>1 yakıt</b> harcar — yakıt bitmeden rotayı tamamla.</p></div>
-        <div><span>🧍</span><p>Rotayı yolcu ve bagajlardan geçir; <b>hepsini toplarsan 3 yıldız!</b></p></div>
+        <div><span>🧩</span><p>Parçaları boş hücreye kaydırıp <b>alttaki kapıdan üstteki piste</b> kesintisiz taksi yolu kur.</p></div>
+        <div><span>🧍</span><p>Uçak ancak <b>TÜM yolcu ve bagajları</b> toplayan rotayla kalkar — eksik varsa kule izin vermez!</p></div>
+        <div><span>⏱️</span><p>Süre bitmeden kalkışı yap. Ne kadar hızlıysan o kadar çok yıldız (<b>%50+ süre kalırsa 3★</b>).</p></div>
         <div><span>🚀</span><p>Zorda kalırsan alttaki <b>booster</b>'ları kullan.</p></div>
       </div>
       <button class="btn" id="startBtn">UÇUŞA BAŞLA 🛫</button>
@@ -193,8 +195,8 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
   <!-- OYUN -->
   <div id="game" class="hidden">
     <header id="hud">
-      <div class="chip" id="lvlBadge">BÖLÜM 1/3</div>
-      <div class="chip" id="fuelBox">⛽ <b id="fuelNum">0</b><div id="fuelBar"><i></i></div></div>
+      <div class="chip" id="lvlBadge">BÖLÜM 1/5</div>
+      <div class="chip" id="timeBox">⏱️ <b id="timeNum">0:00</b><div id="timeBar"><i></i></div></div>
       <div class="chip">🧍 <b id="paxNum">0/0</b></div>
       <div class="chip">🧳 <b id="bagNum">0/0</b></div>
       <button class="iconbtn" id="muteBtn" title="Ses">🔊</button>
@@ -213,7 +215,7 @@ h1,h2{font-family:'Baloo 2','Nunito',system-ui,sans-serif}
     </div>
     <footer id="boosterBar">
       <button class="boost" data-k="tow"><span class="bi">🚚</span><span class="bn">Çekici</span><span class="bc">0</span></button>
-      <button class="boost" data-k="fuel"><span class="bi">⛽</span><span class="bn">Jet Fuel</span><span class="bc">0</span></button>
+      <button class="boost" data-k="time"><span class="bi">⏱️</span><span class="bn">+30 sn</span><span class="bc">0</span></button>
       <button class="boost" data-k="radar"><span class="bi">📡</span><span class="bn">Radar</span><span class="bc">0</span></button>
       <button class="boost" data-k="slot"><span class="bi">🕳️</span><span class="bn">Ekstra Boşluk</span><span class="bc">0</span></button>
     </footer>
@@ -240,24 +242,52 @@ const ROADD={
 };
 function rotCW(m){ return ((m<<1)&15) | (m>>3); }
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function starsFor(col,tot){ if(tot<=0) return 3; if(col>=tot) return 3; if(col>=Math.ceil(tot/2)) return 2; return 1; }
+/* Yıldız: kalan süre oranına göre */
+function starsFor(remain,total){ const f=total>0?remain/total:1; if(f>=0.5) return 3; if(f>=0.25) return 2; return 1; }
 
+/* Portre yönelim: kapı ALTTA (gateCol), pist ÜSTTE (runwayCol). Uçak aşağıdan yukarı gider. */
 const LEVELS=[
-  { name:'Eğitim Uçuşu', cols:4, rows:3, gateRow:1, runwayRow:1,
-    map:['.F7.','-JL-','..o.'],
-    items:[{r:0,c:1,t:'pax'},{r:1,c:3,t:'bag'}],
-    fog:[], rot:[], shuffle:8, fuel:12,
-    hint:'Boşluğa komşu parçalara dokunarak kaydır 👆' },
-  { name:'Aktarma', cols:5, rows:4, gateRow:2, runwayRow:1,
-    map:['.|.-.','.F-7F','-J.LJ','F.o.J'],
-    items:[{r:1,c:1,t:'pax'},{r:1,c:3,t:'bag'},{r:2,c:4,t:'pax'}],
-    fog:[], rot:[], shuffle:14, fuel:20,
-    hint:'Rotayı yolcuların ÜZERİNDEN geçir 🧍' },
-  { name:'Sisli Gece', cols:5, rows:4, gateRow:1, runwayRow:3,
-    map:['.|.Fo','-7...','.|-F7','.L-JL'],
-    items:[{r:2,c:1,t:'pax'},{r:3,c:2,t:'bag'},{r:2,c:3,t:'pax'},{r:3,c:4,t:'pax'}],
-    fog:[[1,1],[3,3],[2,4]], rot:[[0,3]], shuffle:18, fuel:25,
-    hint:'☁️ Sisli parçalar ilk kaydırışta açılır • ↻ döner parçalar her kaydırmada döner' }
+  { name:'Eğitim Uçuşu', cols:3, rows:3, gateCol:1, runwayCol:1,
+    map:['.|.',
+         '.|.',
+         '.|o'],
+    items:[{r:1,c:1,t:'pax'}],
+    fog:[], rot:[], shuffle:2, time:60,
+    hint:'Parçalara dokunarak boşluğa kaydır 👆' },
+  { name:'İlk Görev', cols:3, rows:4, gateCol:0, runwayCol:2,
+    map:['.FJ',
+         '.|.',
+         'FJ.',
+         '|.o'],
+    items:[{r:1,c:1,t:'pax'},{r:2,c:0,t:'bag'}],
+    fog:[], rot:[], shuffle:5, time:90,
+    hint:'Uçak ancak TÜM yolcu ve bagajları toplayan rotayla kalkar 🧍🧳' },
+  { name:'Zigzag Apron', cols:4, rows:4, gateCol:1, runwayCol:3,
+    map:['.F-J',
+         '.L-7',
+         '.F-J',
+         '.|.o'],
+    items:[{r:2,c:2,t:'pax'},{r:1,c:2,t:'bag'},{r:0,c:2,t:'pax'}],
+    fog:[], rot:[], shuffle:9, time:120,
+    hint:'Rotayı zigzag kurup üç hedefi de topla 🔁' },
+  { name:'Sisli Sabah', cols:4, rows:5, gateCol:2, runwayCol:0,
+    map:['L7..',
+         'FJ.-',
+         '|..o',
+         'L-7|',
+         '..|F'],
+    items:[{r:3,c:2,t:'pax'},{r:2,c:0,t:'bag'},{r:1,c:1,t:'pax'},{r:0,c:1,t:'bag'}],
+    fog:[[3,1],[1,1],[2,0]], rot:[], shuffle:13, time:150,
+    hint:'☁️ Sisli parçalar ilk kaydırışta açılır' },
+  { name:'Kule Alarmı', cols:4, rows:5, gateCol:0, runwayCol:3,
+    map:['.7FJ',
+         '-.L7',
+         '.F-J',
+         'FJ.|',
+         '|.o.'],
+    items:[{r:3,c:0,t:'pax'},{r:3,c:1,t:'bag'},{r:2,c:2,t:'pax'},{r:1,c:2,t:'bag'},{r:0,c:2,t:'pax'}],
+    fog:[[2,1],[1,3],[3,1]], rot:[[0,1]], shuffle:18, time:180,
+    hint:'↻ Döner parça her kaydırmada 90° döner!' }
 ];
 
 function parseLevel(L){
@@ -278,9 +308,9 @@ function parseLevel(L){
   return {board,holes,tiles};
 }
 
-/* Kapıdan piste yürüyerek rota doğrulama */
-function walkCore(board,cols,rows,gateRow,runwayRow){
-  let travel=E, cr=gateRow, cc=0;
+/* Alttaki kapıdan üstteki piste yürüyerek rota doğrulama */
+function walkCore(board,cols,rows,gateCol,runwayCol){
+  let travel=N, cr=rows-1, cc=gateCol;
   const cells=[], seen=new Set();
   while(true){
     if(cr<0||cr>=rows||cc<0||cc>=cols) return {ok:false,cells};
@@ -294,7 +324,7 @@ function walkCore(board,cols,rows,gateRow,runwayRow){
     if(seen.has(key)) return {ok:false,cells};
     seen.add(key);
     cells.push({r:cr,c:cc,enter,exit,tile:t});
-    if(cc===cols-1 && exit===E && cr===runwayRow) return {ok:true,cells};
+    if(cr===0 && exit===N && cc===runwayCol) return {ok:true,cells};
     travel=exit;
     cr+=DIRV[exit][0]; cc+=DIRV[exit][1];
   }
@@ -328,7 +358,7 @@ function shuffleCore(board,holes,L,rand){
   };
   while(n>0 && guard-->0){ if(randomSlide()) n--; }
   guard=60;
-  while(walkCore(board,L.cols,L.rows,L.gateRow,L.runwayRow).ok && guard-->0){ randomSlide(); }
+  while(walkCore(board,L.cols,L.rows,L.gateCol,L.runwayCol).ok && guard-->0){ randomSlide(); }
   return moves;
 }
 const CORE_API={N,E,S,W,DIRV,OPP,CHAR2MASK,ROADD,rotCW,mulberry32,starsFor,LEVELS,parseLevel,walkCore,coreSlide,shuffleCore};
@@ -341,9 +371,9 @@ const boardEl=$('#board'), gridLayer=$('#gridLayer'), tileLayer=$('#tileLayer'),
       gateDecor=$('#gateDecor'), runwayDecor=$('#runwayDecor'),
       toastEl=$('#toast'), overlayEl=$('#overlay'), overlayCard=$('#overlayCard');
 
-let G=null, mode=null, toastTimer=0, radarTimer=0;
-let inv={tow:2, fuel:2, radar:3, slot:1};
-let bestStars=[0,0,0];
+let G=null, mode=null, toastTimer=0, radarTimer=0, timerId=0;
+let inv={tow:2, time:2, radar:3, slot:1};
+let bestStars=[0,0,0,0,0];
 
 const PLANE_SVG=`<svg viewBox="-20 -20 40 40"><path fill="#ffffff" stroke="#37474f" stroke-width="1.3" stroke-linejoin="round"
  d="M16,0 C16,-1.8 14,-2.4 12,-2.4 L4,-2.4 L-1,-13 L-5,-13 L-3,-2.4 L-10,-2.4 L-12,-6.5 L-14,-6.5 L-13,-2 C-15,-1.6 -15,1.6 -13,2 L-14,6.5 L-12,6.5 L-10,2.4 L-3,2.4 L-5,13 L-1,13 L4,2.4 L12,2.4 C14,2.4 16,1.8 16,0 Z"/>
@@ -366,10 +396,11 @@ function grassSVG(seed){
 
 /* ================== BÖLÜM KURULUMU ================== */
 function buildLevel(idx){
-  hideOverlay(); cancelMode(); clearGhost(); clearTimeout(radarTimer);
+  hideOverlay(); cancelMode(); clearGhost();
+  clearTimeout(radarTimer); clearInterval(timerId);
   const L=LEVELS[idx];
   const parsed=parseLevel(L);
-  const sol=walkCore(parsed.board,L.cols,L.rows,L.gateRow,L.runwayRow);
+  const sol=walkCore(parsed.board,L.cols,L.rows,L.gateCol,L.runwayCol);
   if(!sol.ok) console.warn('Seviye tasarımı hatalı!',idx);
   const solution=sol.cells.map(c=>({r:c.r,c:c.c,mask:c.tile.mask}));
   const rand=mulberry32((Date.now()^(performance.now()*1000))>>>0);
@@ -378,12 +409,15 @@ function buildLevel(idx){
   const tot={pax:0,bag:0};
   for(const it of L.items) tot[it.t]++;
   G={idx,L,board:parsed.board,holes:parsed.holes,tiles:parsed.tiles,
-     solution,fuel:L.fuel,maxFuel:L.fuel,tot,col:{pax:0,bag:0},
-     state:'idle',cell:64,gateW:60,runW:64,gx:70,radarOn:false,taxi:null,cellEls:[]};
+     solution,tot,col:{pax:0,bag:0},
+     timeTotal:L.time, deadline:performance.now()+L.time*1000, remaining:L.time, lastTick:-1,
+     state:'idle',cell:64,gy:70,gateH:60,runH:64,partialWarned:false,
+     radarOn:false,taxi:null,cellEls:[],turnE:true};
   makeBoardDOM();
   layout();
   hudUI();
   $('#game').classList.remove('hidden');
+  timerId=setInterval(tickTimer,200);
   showToast(`BÖLÜM ${idx+1} • ${L.name}`,1700);
   if(L.hint) setTimeout(()=>{ if(G&&G.idx===idx&&G.state==='idle') showToast(L.hint,3000); },1900);
 }
@@ -415,29 +449,31 @@ function makeBoardDOM(){
     tileLayer.appendChild(el);
   }
   gateDecor.innerHTML=`<div class="gstrip"></div><div class="gbuild"></div><div class="lead" id="gLead"></div><div class="glabel" id="gLabel">GATE 1</div>`;
-  runwayDecor.innerHTML=`<div class="rwy"><div class="rcl"></div><div class="thr t"></div><div class="thr b"></div><span class="rnum">27</span><div class="lead" id="rLead"></div></div>`;
+  runwayDecor.innerHTML=`<div class="rwy"><div class="rcl"></div><div class="thr l"></div><div class="thr r"></div><span class="rnum" id="rNum">09</span><div class="lead" id="rLead"></div></div>`;
   planeEl.innerHTML=PLANE_SVG;
 }
 
-/* ================== YERLEŞİM ================== */
+/* ================== YERLEŞİM (PORTRE) ================== */
 function layout(){
   const L=G.L;
-  const availW=Math.max(300,window.innerWidth-24);
-  const availH=Math.max(240,window.innerHeight-185);
-  let cell=Math.floor(Math.min((availW-24)/(L.cols+2.0), availH/L.rows, 88));
-  cell=Math.max(cell,40);
+  const availW=Math.max(280,window.innerWidth-24);
+  const availH=Math.max(300,window.innerHeight-180);
+  let cell=Math.floor(Math.min((availW-8)/L.cols, availH/(L.rows+2.25), 88));
+  cell=Math.max(cell,42);
   G.cell=cell;
-  G.gateW=Math.round(cell*0.95);
-  G.runW=Math.round(cell*1.0);
-  G.gx=G.gateW+10;
-  const bw=G.gx+L.cols*cell+10+G.runW, bh=L.rows*cell;
+  G.runH=Math.round(cell*1.05);
+  G.gateH=Math.round(cell*0.95);
+  G.gy=G.runH+8;
+  const bw=L.cols*cell;
+  const gateY=G.gy+L.rows*cell+8;
+  const bh=gateY+G.gateH;
+  G.bw=bw; G.bh=bh; G.gateY=gateY;
   boardEl.style.width=bw+'px'; boardEl.style.height=bh+'px';
   boardEl.style.setProperty('--cell',cell+'px');
-  G.bw=bw; G.bh=bh;
   fxEl.width=bw; fxEl.height=bh;
   for(let r=0;r<L.rows;r++)for(let c=0;c<L.cols;c++){
     const d=G.cellEls[r][c];
-    d.style.left=(G.gx+c*cell)+'px'; d.style.top=(r*cell)+'px';
+    d.style.left=(c*cell)+'px'; d.style.top=(G.gy+r*cell)+'px';
     d.style.width=cell+'px'; d.style.height=cell+'px';
   }
   for(const t of G.tiles){
@@ -446,26 +482,32 @@ function layout(){
     const rw=t.el.querySelector('.roadWrap');
     if(rw) rw.style.transform=`rotate(${t.deg}deg)`;
   }
-  gateDecor.style.left='0px'; gateDecor.style.width=G.gateW+'px'; gateDecor.style.height=bh+'px';
-  runwayDecor.style.left=(bw-G.runW)+'px'; runwayDecor.style.width=G.runW+'px'; runwayDecor.style.height=bh+'px';
-  const gLead=$('#gLead'), rLead=$('#rLead'), gLabel=$('#gLabel');
-  const gy=(L.gateRow+0.5)*cell, ry=(L.runwayRow+0.5)*cell;
-  gLead.style.top=(gy-2.5)+'px'; gLead.style.left=Math.round(G.gateW*0.45)+'px'; gLead.style.width=(G.gateW*0.55+10)+'px';
-  gLabel.style.top=gy+'px';
-  rLead.style.top=(ry-2.5)+'px'; rLead.style.left='-10px'; rLead.style.width=(10+G.runW/2)+'px';
+  /* pist üst bant */
+  runwayDecor.style.top='0px'; runwayDecor.style.width=bw+'px'; runwayDecor.style.height=G.runH+'px';
+  /* kapı alt bant */
+  gateDecor.style.top=gateY+'px'; gateDecor.style.width=bw+'px'; gateDecor.style.height=G.gateH+'px';
+  const gx=(L.gateCol+0.5)*cell, rx=(L.runwayCol+0.5)*cell, RY=G.runH*0.5;
+  G.turnE = rx <= bw/2;
+  const gLead=$('#gLead'), rLead=$('#rLead'), gLabel=$('#gLabel'), rNum=$('#rNum');
+  gLead.style.left=(gx-2.5)+'px'; gLead.style.top='-8px'; gLead.style.height=(8+G.gateH*0.45)+'px';
+  gLabel.style.left=gx+'px'; gLabel.style.top='0px';
+  rLead.style.left=(rx-2.5)+'px'; rLead.style.top=RY+'px'; rLead.style.height=(G.runH-RY+8)+'px';
+  rNum.textContent=G.turnE?'09':'27';
+  rNum.style.left=G.turnE?'22px':'auto';
+  rNum.style.right=G.turnE?'auto':'22px';
   const ps=Math.round(cell*0.8);
   planeEl.style.width=ps+'px'; planeEl.style.height=ps+'px';
   if(G.state==='idle'||G.state==='failed') parkPlane();
   updateMovables();
 }
 function place(t,instant){
-  const x=G.gx+t.c*G.cell, y=t.r*G.cell;
+  const x=t.c*G.cell, y=G.gy+t.r*G.cell;
   if(instant){ t.el.style.transition='none'; }
   t.el.style.transform=`translate(${x}px,${y}px)`;
   if(instant){ void t.el.offsetWidth; t.el.style.transition=''; }
 }
 function parkPlane(){
-  setPlane(G.gateW*0.42,(G.L.gateRow+0.5)*G.cell,0,1,1);
+  setPlane((G.L.gateCol+0.5)*G.cell, G.gateY+G.gateH*0.42, -90, 1, 1);
 }
 function setPlane(x,y,deg,scale,alpha){
   const s=parseFloat(planeEl.style.width)||G.cell*0.8;
@@ -473,18 +515,31 @@ function setPlane(x,y,deg,scale,alpha){
   planeEl.style.opacity=alpha;
 }
 
-/* ================== HUD ================== */
+/* ================== HUD & SÜRE ================== */
 function hudUI(){
   $('#lvlBadge').textContent=`BÖLÜM ${G.idx+1}/${LEVELS.length}`;
-  fuelUI(); cargoUI(); updateBoosterBar();
+  timerUI(); cargoUI(); updateBoosterBar();
 }
-function fuelUI(){
-  const n=$('#fuelNum'); n.textContent=G.fuel;
-  n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump');
-  const pct=Math.max(0,G.fuel/G.maxFuel*100);
-  const bar=$('#fuelBar i'); bar.style.width=pct+'%';
+function fmtTime(s){
+  const d=Math.max(0,Math.ceil(s));
+  return Math.floor(d/60)+':'+String(d%60).padStart(2,'0');
+}
+function tickTimer(){
+  if(!G||G.state!=='idle') return;
+  G.remaining=Math.max(0,(G.deadline-performance.now())/1000);
+  timerUI();
+  const sec=Math.ceil(G.remaining);
+  if(sec<=10 && sec!==G.lastTick){ G.lastTick=sec; if(sec>0) sfxTick(); }
+  if(G.remaining<=0){ clearInterval(timerId); failLevel(); }
+}
+function timerUI(){
+  const n=$('#timeNum');
+  const txt=fmtTime(G.remaining);
+  if(n.textContent!==txt) n.textContent=txt;
+  const pct=Math.max(0,G.remaining/G.timeTotal*100);
+  const bar=$('#timeBar i'); bar.style.width=pct+'%';
   bar.style.background=pct>50?'#58c25c':(pct>25?'#f5a623':'#ff5a5a');
-  $('#fuelBox').classList.toggle('low',G.fuel<=3);
+  $('#timeBox').classList.toggle('low',G.remaining<=15&&G.state==='idle');
 }
 function cargoUI(){
   const p=$('#paxNum'), b=$('#bagNum');
@@ -540,15 +595,30 @@ function doSlide(t,h,opts){
     setTimeout(()=>t.el.classList.remove('flying'),430);
   }
   place(t);
-  if(!opts.free){ G.fuel--; fuelUI(); sfxSlide(); }
+  if(!opts.free) sfxSlide();
   updateMovables();
   const wait=opts.fly?440:190;
   setTimeout(()=>{
     if(!G||G.state!=='idle') return;
-    const res=walkCore(G.board,G.L.cols,G.L.rows,G.L.gateRow,G.L.runwayRow);
-    if(res.ok){ startTaxi(res); }
-    else if(G.fuel<=0){ failLevel(); }
+    checkRoute();
   },wait);
+}
+/* Rota kontrolü: geçerli hat + TÜM hedefler rotadaysa kalkış; hedef eksikse uyarı */
+function checkRoute(){
+  const res=walkCore(G.board,G.L.cols,G.L.rows,G.L.gateCol,G.L.runwayCol);
+  if(!res.ok){ G.partialWarned=false; return; }
+  const onRoute=new Set(res.cells.map(c=>c.tile));
+  const missedTiles=G.tiles.filter(t=>t.item && !onRoute.has(t));
+  if(missedTiles.length===0){ startTaxi(res); return; }
+  for(const t of missedTiles){
+    const b=t.el.querySelector('.itemB');
+    if(b){ b.classList.remove('missed'); void b.offsetWidth; b.classList.add('missed'); }
+  }
+  if(!G.partialWarned){
+    G.partialWarned=true;
+    sfxDeny();
+    showToast(`Kule: eksik yük var! Rotayı ${missedTiles.length} hedeften daha geçir 🔄`,2600);
+  }
 }
 window.addEventListener('keydown',e=>{
   if(!G) return;
@@ -565,7 +635,7 @@ window.addEventListener('keydown',e=>{
     }
   }
   if(e.key==='r'||e.key==='R') restartLevel();
-  const bk={'1':'tow','2':'fuel','3':'radar','4':'slot'};
+  const bk={'1':'tow','2':'time','3':'radar','4':'slot'};
   if(bk[e.key]) useBooster(bk[e.key]);
 });
 function restartLevel(){
@@ -608,30 +678,36 @@ function tileSamples(cell,enter,exit,x0,y0,out){
 }
 function startTaxi(res){
   G.state='taxi'; cancelMode(); clearGhost();
+  clearInterval(timerId);
+  G.remaining=Math.max(0,(G.deadline-performance.now())/1000);
+  timerUI();
   for(const c of res.cells) c.tile.el.classList.add('onpath');
-  updateMovables(); sfxConfirm(); showToast('ROTA ONAYLANDI ✈️',1300);
+  updateMovables(); sfxConfirm(); showToast('KULE: Kalkış izni verildi! ✈️',1300);
   const cell=G.cell, L=G.L;
   const P=[];
-  pushPt(P,[G.gateW*0.42,(L.gateRow+0.5)*cell]);
-  pushPt(P,[G.gx,(L.gateRow+0.5)*cell]);
+  pushPt(P,[(L.gateCol+0.5)*cell, G.gateY+G.gateH*0.42]);
+  pushPt(P,[(L.gateCol+0.5)*cell, G.gy+L.rows*cell]);
   const marks=[];
   for(const ci of res.cells){
     const before=P.length;
-    tileSamples(cell,ci.enter,ci.exit,G.gx+ci.c*cell,ci.r*cell,P);
+    tileSamples(cell,ci.enter,ci.exit,ci.c*cell,G.gy+ci.r*cell,P);
     marks.push({tile:ci.tile, idx:before+Math.max(0,Math.floor((P.length-before)/2))});
   }
-  const ry=(L.runwayRow+0.5)*cell;
-  const RX=G.bw-G.runW/2, r=cell*0.55;
-  pushPt(P,[G.gx+L.cols*cell,ry]);
-  pushPt(P,[RX-r,ry]);
-  arcPoints(RX-r,ry-r,r, Math.PI/2, 0, 9, P);
+  const rx=(L.runwayCol+0.5)*cell, RY=G.runH*0.5, r=cell*0.55;
+  pushPt(P,[rx,G.gy]);
+  pushPt(P,[rx,RY+r]);
+  if(G.turnE){
+    arcPoints(rx+r,RY+r,r, Math.PI, -Math.PI/2, 9, P);
+  }else{
+    arcPoints(rx-r,RY+r,r, 0, -Math.PI/2, 9, P);
+  }
   const liftIdx=P.length-1;
-  pushPt(P,[RX,-cell*1.5]);
+  pushPt(P,[G.turnE? G.bw+cell*1.6 : -cell*1.6, RY]);
   const cum=[0];
   for(let i=1;i<P.length;i++) cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
   G.taxi={P,cum,marks:marks.map(m=>({tile:m.tile,d:cum[Math.min(m.idx,cum.length-1)]})),
-          mi:0,d:0,si:0,head:0,total:cum[cum.length-1],
-          lift:cum[liftIdx]+cell*0.5,spd:cell*3.0,last:0,lifted:false};
+          mi:0,d:0,si:0,head:-90,total:cum[cum.length-1],
+          lift:cum[liftIdx]+cell*0.4,spd:cell*3.0,last:0,lifted:false};
   setTimeout(()=>{ engineStart(); requestAnimationFrame(stepTaxi); },620);
 }
 function stepTaxi(ts){
@@ -673,8 +749,7 @@ function collectTile(t){
 /* ================== KAZANMA / KAYBETME ================== */
 function winLevel(){
   G.state='won';
-  const tot=G.tot.pax+G.tot.bag, col=G.col.pax+G.col.bag;
-  const s=starsFor(col,tot);
+  const s=starsFor(G.remaining,G.timeTotal);
   bestStars[G.idx]=Math.max(bestStars[G.idx],s);
   confetti(); sfxWin();
   setTimeout(()=>showWinOverlay(s),1150);
@@ -684,8 +759,8 @@ function showWinOverlay(s){
   overlayHTML(`
     <h2>BÖLÜM TAMAMLANDI! 🛫</h2>
     <div class="stars">${[1,2,3].map(i=>`<span class="star${i<=s?' on':''}" style="animation-delay:${.15+i*0.18}s">★</span>`).join('')}</div>
-    <p class="stats">🧍 ${G.col.pax}/${G.tot.pax} &nbsp;•&nbsp; 🧳 ${G.col.bag}/${G.tot.bag} &nbsp;•&nbsp; ⛽ ${G.fuel} kaldı</p>
-    ${s<3?'<p class="stats" style="font-size:13px;color:#8a99a3">3 yıldız için rotayı TÜM yolcu ve bagajlardan geçir!</p>':''}
+    <p class="stats">🧍 ${G.col.pax}/${G.tot.pax} &nbsp;•&nbsp; 🧳 ${G.col.bag}/${G.tot.bag} &nbsp;•&nbsp; ⏱️ ${fmtTime(G.remaining)} kaldı</p>
+    ${s<3?'<p class="stats" style="font-size:13px;color:#8a99a3">Sürenin yarısından fazlası kalırsa 3 yıldız! ⚡</p>':''}
     <div class="btnrow">
       <button class="btn ghostb" id="obRetry">🔁 Tekrar</button>
       <button class="btn" id="obNext">${last?'🏆 Sonuçlar':'Sonraki Bölüm ▶'}</button>
@@ -701,22 +776,28 @@ function showEnd(){
     <p class="sub">Toplam ${total}/${LEVELS.length*3} yıldız</p>
     ${LEVELS.map((L,i)=>`<div class="endrow"><span>Bölüm ${i+1} • ${L.name}</span><span class="st">${'★'.repeat(bestStars[i])}${'☆'.repeat(3-bestStars[i])}</span></div>`).join('')}
     <div class="btnrow"><button class="btn" id="obAgain">🔁 Baştan Oyna</button></div>`);
-  $('#obAgain').onclick=()=>{ bestStars=[0,0,0]; inv={tow:2,fuel:2,radar:3,slot:1}; buildLevel(0); };
+  $('#obAgain').onclick=()=>{ bestStars=[0,0,0,0,0]; inv={tow:2,time:2,radar:3,slot:1}; buildLevel(0); };
 }
 function failLevel(){
-  G.state='failed'; sfxFail();
+  G.state='failed'; cancelMode(); sfxFail();
+  const missPax=G.tot.pax-G.col.pax, missBag=G.tot.bag-G.col.bag;
   setTimeout(()=>{
     overlayHTML(`
-      <div style="font-size:52px">⛽</div>
-      <h2>YAKIT BİTTİ!</h2>
-      <p class="sub">Uçak piste ulaşamadan yakıt tükendi.</p>
+      <div style="font-size:52px">⏱️</div>
+      <h2>SÜRE DOLDU!</h2>
+      <p class="sub">Uçak kalkamadan zaman tükendi.<br>Toplanamayan: 🧍 ${missPax} &nbsp;•&nbsp; 🧳 ${missBag}</p>
       <div class="btnrow">
         <button class="btn ghostb" id="obRetry2">🔁 Tekrar Dene</button>
-        ${inv.fuel>0?`<button class="btn" id="obJet">⛽ Jet Fuel Kullan (${inv.fuel})</button>`:''}
+        ${inv.time>0?`<button class="btn" id="obTime">⏱️ +30 sn Kullan (${inv.time})</button>`:''}
       </div>`);
     $('#obRetry2').onclick=()=>buildLevel(G.idx);
-    const j=$('#obJet');
-    if(j) j.onclick=()=>{ inv.fuel--; G.fuel+=5; G.state='idle'; hideOverlay(); fuelUI(); updateBoosterBar(); updateMovables(); sfxFuel(); showToast('+5 Yakıt ⛽'); };
+    const j=$('#obTime');
+    if(j) j.onclick=()=>{
+      inv.time--; G.deadline=performance.now()+30000; G.remaining=30; G.lastTick=-1;
+      G.state='idle'; hideOverlay(); timerUI(); updateBoosterBar(); updateMovables();
+      clearInterval(timerId); timerId=setInterval(tickTimer,200);
+      sfxTime(); showToast('+30 saniye ⏱️');
+    };
   },420);
 }
 function overlayHTML(html){ overlayCard.innerHTML=html; overlayEl.classList.remove('hidden'); }
@@ -727,7 +808,11 @@ function useBooster(k){
   if(!G||G.state!=='idle') return;
   if(mode===k){ cancelMode(); return; }
   if(inv[k]<=0){ showToast('Bu booster tükendi 😕'); return; }
-  if(k==='fuel'){ inv.fuel--; G.fuel+=5; fuelUI(); updateBoosterBar(); sfxFuel(); showToast('+5 Yakıt ⛽'); return; }
+  if(k==='time'){
+    inv.time--; G.deadline+=30000; updateBoosterBar(); sfxTime();
+    G.remaining=Math.max(0,(G.deadline-performance.now())/1000); timerUI();
+    showToast('+30 saniye ⏱️'); return;
+  }
   if(k==='radar'){ doRadar(); return; }
   if(k==='tow'){ setMode('tow'); showToast('Taşınacak parçayı seç 🚚',2200); return; }
   if(k==='slot'){
@@ -777,7 +862,7 @@ function doRadar(){
     const cur=G.board[s.r][s.c];
     if(cur&&cur.road&&cur.mask===s.mask){ g.classList.add('ok'); }
     else{ g.innerHTML=roadSVG(s.mask,'#2fd6ff','14 9'); }
-    g.style.left=(G.gx+s.c*G.cell)+'px'; g.style.top=(s.r*G.cell)+'px';
+    g.style.left=(s.c*G.cell)+'px'; g.style.top=(G.gy+s.r*G.cell)+'px';
     g.style.width=G.cell+'px'; g.style.height=G.cell+'px';
     ghostLayer.appendChild(g);
   }
@@ -846,7 +931,8 @@ const sfxDing=()=>{tone(880,.1,'sine',.24);tone(1318,.16,'sine',.2,.08)};
 const sfxConfirm=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.12,'triangle',.2,i*.07));
 const sfxWin=()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.17,'triangle',.22,i*.09));
 const sfxFail=()=>[330,262,196].forEach((f,i)=>tone(f,.22,'sawtooth',.14,i*.16));
-const sfxFuel=()=>tone(380,.25,'sine',.2,0,820);
+const sfxTime=()=>tone(380,.25,'sine',.2,0,820);
+const sfxTick=()=>tone(950,.05,'square',.08);
 const sfxTow=()=>tone(220,.3,'sawtooth',.1,0,95);
 const sfxPoof=()=>tone(520,.25,'sine',.14,0,90);
 const sfxRadar=()=>{tone(1250,.09,'sine',.14);tone(1250,.09,'sine',.1,.24);tone(1250,.09,'sine',.07,.48)};

@@ -287,17 +287,34 @@ details summary{cursor:pointer;font:800 17px 'Baloo 2','Nunito',system-ui,sans-s
 #designTable .fl{color:#c0392b}
 .mapFoot{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .note{font-size:12px;font-weight:700;color:var(--ink2);text-align:center;opacity:.85}
+
+/* ---------- Ana menü: bölüm seçimi (her satır 5 bölüm; yeni özellikler satır sonunda) ---------- */
+.menuLv{text-align:left;margin-top:20px;padding-top:14px;border-top:2px dashed #e3e9ed}
+.menuGrid{grid-template-columns:repeat(5,1fr)}
+.legend .sw.bar{width:14px;height:5px}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- BAŞLANGIÇ EKRANI -->
+  <!-- BAŞLANGIÇ EKRANI (ANA MENÜ) -->
   <div class="screen" id="startScreen">
     <div class="card">
       <div style="font-size:58px">🛫</div>
       <h1>RUNWAY RUSH</h1>
       <div class="sub">Taksi Yolu Bulmacası — Prototip v0.3 • 30 Bölüm</div>
+      <button class="btn" id="startBtn">UÇUŞA BAŞLA 🛫</button>
+      <section class="menuLv" aria-labelledby="menuLvTitle">
+        <div class="pTitle" id="menuLvTitle">Bölümler <span class="prog" id="menuProg">✓ 0/30</span></div>
+        <div class="pSub">Tüm bölümler açık — dokun, direkt başla.</div>
+        <div class="levelGrid menuGrid" id="menuGrid"></div>
+        <div class="legend">
+          <span><i class="sw bar" style="background:var(--t-normal)"></i>Kolay</span>
+          <span><i class="sw bar" style="background:var(--t-hard)"></i>Zor</span>
+          <span><i class="sw bar" style="background:var(--t-relief)"></i>Rahatlama</span>
+        </div>
+      </section>
+      <div class="btnrow"><button class="btn ghostb small" id="startMapBtn">🗺️ Bölüm Haritası &amp; Zorluk Eğrisi</button></div>
       <div class="howto">
         <div><span>🧩</span><p>Parçaları boş hücreye kaydırıp <b>alttaki kapıdan üstteki piste</b> kesintisiz taksi yolu kur.</p></div>
         <div><span>🧍</span><p>Uçak ancak <b>TÜM yolcu ve bagajları</b> toplayan rotayla kalkar — eksik varsa kule izin vermez!</p></div>
@@ -305,8 +322,6 @@ details summary{cursor:pointer;font:800 17px 'Baloo 2','Nunito',system-ui,sans-s
         <div><span>✨</span><p>Her 5 bölümde yeni bir parça türü açılır: <b>☁️ sisli, ↻ döner, ⛓️ bağlı, 🔒 kilitli</b>.</p></div>
         <div><span>🚀</span><p>Zorda kalırsan alttaki <b>booster</b>'ları kullan. <b>Zor bölümler</b> 🎁 booster kazandırır.</p></div>
       </div>
-      <button class="btn" id="startBtn">UÇUŞA BAŞLA 🛫</button>
-      <div class="btnrow"><button class="btn ghostb small" id="startMapBtn">🗺️ Bölüm Haritası &amp; Zorluk Eğrisi</button></div>
       <div class="tiny">Konsept: Runway_Rush_Muhammed (8/26) • Tek dosya HTML prototipi</div>
     </div>
   </div>
@@ -321,6 +336,7 @@ details summary{cursor:pointer;font:800 17px 'Baloo 2','Nunito',system-ui,sans-s
       <div class="chip">🧳 <b id="bagNum">0/0</b></div>
       <button class="iconbtn" id="muteBtn" title="Ses">🔊</button>
       <button class="iconbtn" id="restartBtn" title="Bölümü yeniden başlat">🔁</button>
+      <button class="iconbtn" id="homeBtn" title="Ana menü (bölüm duraklar)">🏠</button>
     </header>
     <div id="boardWrap">
       <div id="board">
@@ -351,12 +367,13 @@ details summary{cursor:pointer;font:800 17px 'Baloo 2','Nunito',system-ui,sans-s
       </div>
       <section class="panel">
         <div class="pTitle" id="curveTitle">Zorluk eğrisi</div>
-        <div class="pSub">İlk 10 bölüm çok kolay; sonra kademeli artış ve testere dişi: <b>14 · 19 · 23 · 29</b> zor, her birinin ardından rahatlama. Yeni özellikler <b>5 · 10 · 15 · 20</b>'de açılır. Her çubuk bir bölüm; yükseklik tasarım zorluk puanı (0–10).</div>
+        <div class="pSub">Zor bölümler yalnızca <b>14 · 19 · 23 · 29</b> (29 çok zor); her birinin ardından rahatlama gelir. Geri kalan her bölüm ilk bakışta çözülecek kadar kolay: <b>en fazla 3 hamle</b>. Yeni özellikler <b>5 · 10 · 15 · 20</b>'de açılır. Her çubuk bir bölüm; yükseklik tasarım zorluk puanı (0–10).</div>
         <div class="chartBox" id="curveBox"></div>
         <div class="legend">
-          <span><i class="sw" style="background:var(--t-normal)"></i>Kolay / normal</span>
+          <span><i class="sw" style="background:var(--t-normal)"></i>Kolay</span>
           <span><i class="sw" style="background:var(--t-hard)"></i>Zor (tepe)</span>
           <span><i class="sw" style="background:var(--t-relief)"></i>Rahatlama</span>
+          <span><i class="sw" style="background:var(--band);box-shadow:inset 0 0 0 1px var(--baseln)"></i>Kolay bölge (≤ 3 hamle)</span>
           <span>☁️ ↻ ⛓️ 🔒 Yeni özellik</span>
         </div>
       </section>
@@ -410,26 +427,26 @@ const LEVELS=[
     seed:1, shuffle:1, par:1, time:60,
     hint:"Parçalara dokunarak boşluğa kaydır 👆" },
   /* 2 */
-  { name:"İlk Görev", tier:'easy', diff:1.3,
+  { name:"İlk Görev", tier:'easy', diff:1.8,
     cols:3, rows:3, gateCol:2, runwayCol:1,
     map:[".|.","oL7","..|"],
     items:[{r:1,c:2,t:'pax'},{r:1,c:1,t:'bag'}],
-    seed:2, shuffle:3, par:2, time:60,
+    seed:1, shuffle:3, par:2, time:75,
     hint:"Uçak ancak TÜM yolcu ve bagajları toplayan rotayla kalkar 🧍🧳" },
   /* 3 */
-  { name:"Sabah Seferi", tier:'easy', diff:1.6,
+  { name:"Sabah Seferi", tier:'easy', diff:1.8,
     cols:3, rows:4, gateCol:0, runwayCol:2,
     map:[".FJ",".|.","FJ.","|.o"],
     items:[{r:1,c:1,t:'pax'},{r:2,c:0,t:'bag'}],
-    seed:1, shuffle:3, par:2, time:60 },
+    seed:1, shuffle:3, par:2, time:75 },
   /* 4 */
   { name:"Kısa Mesafe", tier:'easy', diff:1.8,
     cols:3, rows:4, gateCol:0, runwayCol:2,
     map:["..|","o.|",".FJ","FJ-"],
     items:[{r:3,c:0,t:'bag'},{r:2,c:2,t:'pax'},{r:1,c:2,t:'pax'}],
-    seed:2, shuffle:6, par:3, time:75 },
+    seed:26, shuffle:3, par:2, time:75 },
   /* 5 */
-  { name:"Sisli Sabah", tier:'easy', diff:2, feat:'fog',
+  { name:"Sisli Sabah", tier:'easy', diff:2.1, feat:'fog',
     cols:3, rows:4, gateCol:0, runwayCol:2,
     map:["..|",".o|","F-J","|.."],
     items:[{r:2,c:0,t:'bag'},{r:0,c:2,t:'pax'}],
@@ -437,62 +454,62 @@ const LEVELS=[
     seed:1, shuffle:5, par:2, time:75,
     hint:"Sisli parçayı kaydır, altındaki yol ortaya çıksın ☁️" },
   /* 6 */
-  { name:"Pus", tier:'easy', diff:2.3,
+  { name:"Pus", tier:'easy', diff:2.1,
     cols:4, rows:4, gateCol:0, runwayCol:3,
     map:["Jo.|","F--J","|...","|..."],
     items:[{r:2,c:0,t:'bag'},{r:1,c:0,t:'pax'},{r:0,c:3,t:'pax'}],
     fog:[[1,2]],
-    seed:4, shuffle:4, par:3, time:75 },
+    seed:13, shuffle:2, par:2, time:75 },
   /* 7 */
-  { name:"Yolcu Kapısı", tier:'easy', diff:2.5,
+  { name:"Yolcu Kapısı", tier:'easy', diff:2.1,
     cols:4, rows:4, gateCol:0, runwayCol:2,
     map:[".FJ|","o|..","FJ..","|..."],
     items:[{r:2,c:0,t:'pax'},{r:2,c:1,t:'bag'},{r:0,c:2,t:'pax'}],
-    fog:[[1,3]],
-    seed:2, shuffle:4, par:3, time:90 },
+    fog:[[3,0]],
+    seed:5, shuffle:2, par:2, time:75 },
   /* 8 */
-  { name:"Zigzag Apron", tier:'easy', diff:2.8,
+  { name:"Zigzag Apron", tier:'easy', diff:3,
     cols:4, rows:4, gateCol:1, runwayCol:3,
     map:[".F-J",".L-7",".F-J",".|.o"],
     items:[{r:2,c:2,t:'pax'},{r:1,c:2,t:'bag'},{r:0,c:2,t:'pax'}],
     fog:[[2,3]],
     seed:3, shuffle:3, par:3, time:90 },
   /* 9 */
-  { name:"Aktarma", tier:'easy', diff:3.1,
+  { name:"Aktarma", tier:'easy', diff:2.1,
     cols:4, rows:4, gateCol:1, runwayCol:2,
     map:["F-J.","L7.J",".|oF",".|.."],
     items:[{r:3,c:1,t:'pax'},{r:2,c:1,t:'pax'},{r:0,c:0,t:'bag'},{r:0,c:2,t:'bag'}],
     fog:[[3,3],[1,1]],
-    seed:1, shuffle:5, par:4, time:90 },
+    seed:4, shuffle:5, par:2, time:75 },
   /* 10 */
-  { name:"Döner Kavşak", tier:'easy', diff:3, feat:'rot',
+  { name:"Döner Kavşak", tier:'easy', diff:2.1, feat:'rot',
     cols:4, rows:4, gateCol:1, runwayCol:3,
     map:["..FJ","..|.",".-|.","oFJ."],
     items:[{r:3,c:1,t:'bag'},{r:2,c:2,t:'pax'},{r:0,c:3,t:'pax'}],
     rot:[[2,2]],
-    seed:8, shuffle:3, par:3, time:90,
+    seed:2, shuffle:4, par:2, time:75,
     hint:"Turuncu ↻ parça her kaydırılışında 90° döner" },
   /* 11 */
-  { name:"Rüzgâr Değişimi", tier:'normal', diff:3.8,
+  { name:"Rüzgâr Değişimi", tier:'easy', diff:2.5,
     cols:4, rows:5, gateCol:2, runwayCol:3,
     map:["F--J","L-7.",".o|.",".F|.","F.|."],
     items:[{r:2,c:2,t:'bag'},{r:1,c:1,t:'pax'},{r:0,c:3,t:'pax'}],
     fog:[[1,0]], rot:[[3,1]],
-    seed:1, shuffle:4, par:4, time:105 },
+    seed:8, shuffle:5, par:2, time:75 },
   /* 12 */
-  { name:"Yoğun Trafik", tier:'normal', diff:4.4,
+  { name:"Yoğun Trafik", tier:'easy', diff:3.3,
     cols:4, rows:5, gateCol:2, runwayCol:0,
     map:["L7F.","-|..",".L7.","..|.",".o|."],
     items:[{r:4,c:2,t:'pax'},{r:2,c:2,t:'bag'},{r:2,c:1,t:'pax'},{r:0,c:0,t:'bag'}],
-    fog:[[3,0]], rot:[[1,1]],
-    seed:5, shuffle:8, par:5, time:120 },
+    fog:[[2,2]], rot:[[2,1]],
+    seed:31, shuffle:6, par:3, time:90 },
   /* 13 */
-  { name:"Kule Alarmı", tier:'normal', diff:5,
+  { name:"Kule Alarmı", tier:'easy', diff:3.3,
     cols:4, rows:5, gateCol:0, runwayCol:3,
     map:[".7FJ","-.L7",".F-J","FJ.|","|.o."],
     items:[{r:3,c:0,t:'pax'},{r:3,c:1,t:'bag'},{r:2,c:2,t:'pax'},{r:1,c:2,t:'bag'},{r:0,c:2,t:'pax'}],
-    fog:[[2,1],[1,3],[3,1]], rot:[[0,1]],
-    seed:3, shuffle:6, par:5, time:120 },
+    fog:[[0,3]], rot:[[2,3]],
+    seed:8, shuffle:5, par:3, time:90 },
   /* 14 */
   { name:"Fırtına Uyarısı", tier:'hard', diff:7.2,
     cols:5, rows:5, gateCol:2, runwayCol:0,
@@ -501,34 +518,34 @@ const LEVELS=[
     fog:[[3,2],[2,1]], rot:[[2,0]],
     seed:86, shuffle:8, par:7, time:150 },
   /* 15 */
-  { name:"Tandem Taksi", tier:'relief', diff:3.8, feat:'link',
+  { name:"Tandem Taksi", tier:'relief', diff:1.9, feat:'link',
     cols:4, rows:5, gateCol:0, runwayCol:0,
     map:["L-7.","..|.","F-J.","|...","|o.F"],
     items:[{r:4,c:0,t:'bag'},{r:1,c:2,t:'pax'},{r:0,c:1,t:'pax'}],
     link:[[[2,2],[1,2]]],
-    seed:14, shuffle:9, par:3, time:105,
+    seed:242, shuffle:4, par:2, time:75,
     hint:"Bağlı çift birlikte kayar: boşluğu çiftin ucuna getir ⛓️" },
   /* 16 */
-  { name:"Kargo Terminali", tier:'normal', diff:4.8,
+  { name:"Kargo Terminali", tier:'easy', diff:3.3,
     cols:4, rows:5, gateCol:0, runwayCol:1,
     map:["o|..",".L-7","F--J","|...","|F-."],
     items:[{r:4,c:0,t:'bag'},{r:2,c:0,t:'pax'},{r:1,c:3,t:'pax'},{r:1,c:2,t:'bag'}],
-    fog:[[2,2]], link:[[[1,3],[1,2]]],
-    seed:1, shuffle:5, par:5, time:120 },
+    fog:[[0,1]], link:[[[1,1],[1,2]]],
+    seed:49, shuffle:4, par:3, time:90 },
   /* 17 */
-  { name:"Aktarma Merkezi", tier:'normal', diff:5.3,
+  { name:"Aktarma Merkezi", tier:'easy', diff:3.3,
     cols:5, rows:5, gateCol:4, runwayCol:3,
     map:[".F-J.",".L-7.",".o.|.","..|L7","F...|"],
     items:[{r:3,c:4,t:'pax'},{r:3,c:3,t:'bag'},{r:1,c:1,t:'pax'},{r:0,c:1,t:'bag'}],
-    rot:[[2,3]], link:[[[1,2],[2,2]]],
-    seed:13, shuffle:7, par:5, time:120 },
+    rot:[[3,3]], link:[[[1,3],[2,3]]],
+    seed:18, shuffle:5, par:3, time:105 },
   /* 18 */
-  { name:"Kalabalık Apron", tier:'normal', diff:5.9,
+  { name:"Kalabalık Apron", tier:'easy', diff:3.6,
     cols:5, rows:5, gateCol:4, runwayCol:1,
     map:[".|..7","oL-7.","F--J.","L---7",".-.F|"],
     items:[{r:4,c:4,t:'bag'},{r:3,c:0,t:'pax'},{r:2,c:2,t:'pax'},{r:1,c:2,t:'pax'}],
     fog:[[2,3]], rot:[[3,1]], link:[[[1,3],[1,2]]],
-    seed:54, shuffle:6, par:6, time:135 },
+    seed:21, shuffle:3, par:3, time:105 },
   /* 19 */
   { name:"Kış Operasyonu", tier:'hard', diff:8,
     cols:5, rows:5, gateCol:4, runwayCol:1,
@@ -537,27 +554,27 @@ const LEVELS=[
     fog:[[0,3]], rot:[[0,1]], link:[[[1,1],[1,2]],[[3,1],[3,0]]],
     seed:1383, shuffle:10, par:8, time:165 },
   /* 20 */
-  { name:"Kilitli Hangar", tier:'relief', diff:4.6, feat:'lock',
+  { name:"Kilitli Hangar", tier:'relief', diff:1.9, feat:'lock',
     cols:4, rows:5, gateCol:0, runwayCol:3,
     map:["..F|","...|",".F-J","o|..","FJ.."],
     items:[{r:4,c:1,t:'pax'},{r:2,c:2,t:'bag'},{r:0,c:3,t:'pax'}],
-    lock:[[4,1]], svc:[4,2],
-    seed:71, shuffle:10, keyShuffle:1, par:4, time:120,
+    lock:[[2,1]], svc:[1,1],
+    seed:1, shuffle:2, keyShuffle:1, par:2, time:90,
     hint:"Önce 🔑 anahtarlı parçayı sarı SERVİS alanına götür" },
   /* 21 */
-  { name:"Servis Yolu", tier:'normal', diff:5.6,
+  { name:"Servis Yolu", tier:'easy', diff:3.3,
     cols:5, rows:5, gateCol:1, runwayCol:3,
     map:["F--J.","L---7","7...|","oF--J",".|.|."],
     items:[{r:4,c:1,t:'bag'},{r:2,c:4,t:'bag'},{r:1,c:3,t:'pax'},{r:0,c:1,t:'pax'}],
-    fog:[[3,4]], lock:[[4,2]], svc:[4,4],
-    seed:38, shuffle:13, keyShuffle:3, par:5, time:120 },
+    fog:[[3,4]], lock:[[2,4]], svc:[4,4],
+    seed:57, shuffle:5, keyShuffle:1, par:3, time:120 },
   /* 22 */
-  { name:"Anahtar Teslim", tier:'normal', diff:6.3,
+  { name:"Anahtar Teslim", tier:'easy', diff:3.3,
     cols:5, rows:5, gateCol:1, runwayCol:3,
     map:["...|.","F--JL","L--7.","oF-J.",".|..L"],
     items:[{r:4,c:1,t:'bag'},{r:2,c:3,t:'pax'},{r:1,c:0,t:'pax'},{r:0,c:3,t:'pax'}],
-    link:[[[0,3],[0,4]]], lock:[[1,0]], svc:[0,2],
-    seed:123, shuffle:10, keyShuffle:2, par:6, time:135 },
+    link:[[[3,2],[3,3]]], lock:[[3,1]], svc:[4,0],
+    seed:1709, shuffle:2, keyShuffle:1, par:3, time:120 },
   /* 23 */
   { name:"Gece Yarısı Kalkışı", tier:'hard', diff:8.6,
     cols:5, rows:6, gateCol:1, runwayCol:2,
@@ -566,40 +583,40 @@ const LEVELS=[
     fog:[[4,2]], link:[[[2,1],[1,1]]], lock:[[4,1]], svc:[1,0],
     seed:337, shuffle:18, keyShuffle:4, par:9, time:180 },
   /* 24 */
-  { name:"Sakin Rüzgâr", tier:'relief', diff:5.3,
+  { name:"Sakin Rüzgâr", tier:'relief', diff:2.2,
     cols:4, rows:5, gateCol:2, runwayCol:1,
     map:["FJ..","|...","L-7L","..|.",".||o"],
     items:[{r:3,c:2,t:'bag'},{r:2,c:1,t:'pax'},{r:1,c:0,t:'bag'},{r:0,c:0,t:'pax'}],
     fog:[[2,2]], rot:[[3,2]],
-    seed:1, shuffle:6, par:5, time:135 },
+    seed:1, shuffle:3, par:2, time:75 },
   /* 25 */
-  { name:"Bayram Yoğunluğu", tier:'normal', diff:6.2,
+  { name:"Bayram Yoğunluğu", tier:'easy', diff:2.5,
     cols:5, rows:5, gateCol:4, runwayCol:3,
     map:["...|.",".F-J|",".L-7-","Fo.|.","...L7"],
     items:[{r:4,c:4,t:'pax'},{r:2,c:3,t:'bag'},{r:2,c:1,t:'pax'},{r:1,c:2,t:'pax'},{r:0,c:3,t:'bag'}],
-    rot:[[2,1]], link:[[[2,3],[2,2]]],
-    seed:10, shuffle:13, par:6, time:135 },
+    rot:[[4,3]], link:[[[2,3],[3,3]]],
+    seed:19, shuffle:4, par:2, time:90 },
   /* 26 */
-  { name:"Transit Yolcu", tier:'normal', diff:6.6,
+  { name:"Transit Yolcu", tier:'easy', diff:3.3,
     cols:5, rows:5, gateCol:4, runwayCol:4,
     map:["|F--J",".|..L",".L-7.",".o.L7","..J.|"],
     items:[{r:4,c:4,t:'bag'},{r:2,c:3,t:'pax'},{r:2,c:1,t:'pax'},{r:1,c:1,t:'bag'},{r:0,c:4,t:'pax'}],
-    fog:[[3,4],[3,3]], lock:[[4,3]], svc:[2,4],
-    seed:198, shuffle:7, keyShuffle:2, par:6, time:135 },
+    fog:[[2,1],[1,1]], lock:[[2,2]], svc:[3,2],
+    seed:1366, shuffle:6, keyShuffle:1, par:3, time:120 },
   /* 27 */
-  { name:"Kuleden Uyarı", tier:'normal', diff:7.1,
+  { name:"Kuleden Uyarı", tier:'easy', diff:3.4,
     cols:5, rows:6, gateCol:2, runwayCol:4,
     map:["...FJ","o.-|.","F--J.","|.F..","|...L","L-7.."],
     items:[{r:5,c:2,t:'pax'},{r:4,c:0,t:'pax'},{r:3,c:0,t:'bag'},{r:2,c:1,t:'pax'},{r:0,c:4,t:'bag'}],
-    link:[[[2,3],[1,3]]], lock:[[2,1]], svc:[1,4],
-    seed:779, shuffle:15, keyShuffle:3, par:7, time:150 },
+    link:[[[2,0],[3,0]]], lock:[[4,0]], svc:[4,1],
+    seed:531, shuffle:6, keyShuffle:1, par:3, time:120 },
   /* 28 */
-  { name:"Son Çağrı", tier:'normal', diff:7.5,
+  { name:"Son Çağrı", tier:'easy', diff:3.6,
     cols:5, rows:6, gateCol:2, runwayCol:0,
     map:["L-7.J",".-|.7",".FJ..",".L-7.","...|.","o.FJ."],
     items:[{r:5,c:3,t:'pax'},{r:3,c:3,t:'pax'},{r:3,c:2,t:'bag'},{r:2,c:2,t:'pax'},{r:1,c:2,t:'bag'},{r:0,c:0,t:'bag'}],
     fog:[[5,2]], rot:[[4,3]], link:[[[2,1],[2,0]]],
-    seed:150, shuffle:10, par:7, time:150 },
+    seed:76, shuffle:6, par:3, time:105 },
   /* 29 */
   { name:"Kasırga Alarmı", tier:'super', diff:9.6,
     cols:5, rows:6, gateCol:3, runwayCol:2,
@@ -608,12 +625,12 @@ const LEVELS=[
     fog:[[0,2]], rot:[[4,3]], link:[[[4,1],[4,0]]], lock:[[3,0]], svc:[0,0],
     seed:834, shuffle:12, keyShuffle:4, par:10, time:210 },
   /* 30 */
-  { name:"Final Uçuşu", tier:'relief', diff:6,
+  { name:"Final Uçuşu", tier:'relief', diff:3.3,
     cols:5, rows:5, gateCol:1, runwayCol:1,
     map:[".L--7",".|..|","F---J","L7...",".|7o."],
     items:[{r:3,c:1,t:'pax'},{r:2,c:1,t:'bag'},{r:2,c:3,t:'bag'},{r:2,c:4,t:'pax'},{r:0,c:3,t:'pax'}],
-    fog:[[0,4]], rot:[[1,4]], link:[[[0,2],[0,1]]],
-    seed:29, shuffle:7, par:6, time:150 }
+    fog:[[4,1]], rot:[[2,4]], link:[[[3,0],[3,1]]],
+    seed:33, shuffle:5, par:3, time:105 }
 ];
 /*__END_LEVELS__*/
 
@@ -1342,10 +1359,12 @@ function showWinOverlay(){
     ${G.reward?`<div class="reward">🎁 Zor bölüm ödülü: 🚚 +1 · ⏱️ +1 · 📡 +1</div>`:''}
     <p class="tiny">Tasarım verisi: ${G.moves} hamle (en az ${L.par}) • ${G.usedSec} sn • ${SAVE.tries[G.idx]}. deneme</p>
     <div class="btnrow">
+      <button class="btn ghostb" id="obHome" title="Ana menü">🏠</button>
       <button class="btn ghostb" id="obMap" title="Bölüm haritası">🗺️</button>
       <button class="btn ghostb" id="obRetry">🔁 Tekrar</button>
       <button class="btn" id="obNext">${last?'🏆 Sonuçlar':'Sonraki Bölüm ▶'}</button>
     </div>`);
+  $('#obHome').onclick=goHome;
   $('#obMap').onclick=openMap;
   $('#obRetry').onclick=()=>openLevel(G.idx,{skipIntro:true});
   $('#obNext').onclick=()=>{ last?showEnd():openLevel(G.idx+1); };
@@ -1357,9 +1376,11 @@ function showEnd(){
     <h2>${done===LEVELS.length?'TÜM BÖLÜMLER TAMAMLANDI!':'PROTOTİP SONU'}</h2>
     <p class="sub">${done}/${LEVELS.length} bölüm tamamlandı • toplam ${tries} deneme</p>
     <div class="btnrow">
+      <button class="btn ghostb" id="obHome" title="Ana menü">🏠</button>
       <button class="btn ghostb" id="obAgain">🔁 1. Bölüm</button>
       <button class="btn" id="obMap2">🗺️ Bölüm Haritası</button>
     </div>`);
+  $('#obHome').onclick=goHome;
   $('#obAgain').onclick=()=>openLevel(0);
   $('#obMap2').onclick=openMap;
 }
@@ -1374,10 +1395,12 @@ function failLevel(){
       <h2>SÜRE DOLDU!</h2>
       <p class="sub">Uçak kalkamadan zaman tükendi.<br>Toplanamayan: 🧍 ${missPax} &nbsp;•&nbsp; 🧳 ${missBag}</p>
       <div class="btnrow">
+        <button class="btn ghostb" id="obHome" title="Ana menü">🏠</button>
         <button class="btn ghostb" id="obMap3" title="Bölüm haritası">🗺️</button>
         <button class="btn ghostb" id="obRetry2">🔁 Tekrar Dene</button>
         ${inv.time>0?`<button class="btn" id="obTime">⏱️ +30 sn Kullan (${inv.time})</button>`:''}
       </div>`);
+    $('#obHome').onclick=goHome;
     $('#obMap3').onclick=openMap;
     $('#obRetry2').onclick=()=>openLevel(G.idx,{skipIntro:true});
     const j=$('#obTime');
@@ -1482,27 +1505,51 @@ function updateBoosterBar(){
   });
 }
 
+/* ================== DURAKLAT / ANA MENÜ ================== */
+function pauseLevel(){
+  if(!G||G.state!=='idle') return;
+  G.pausedLeft=Math.max(0,(G.deadline-performance.now())/1000);
+  G.state='paused'; clearInterval(timerId); cancelMode(); clearGhost();
+}
+function resumeLevel(){
+  if(!G||G.state!=='paused') return;
+  G.state='idle'; G.deadline=performance.now()+G.pausedLeft*1000;
+  clearInterval(timerId); timerId=setInterval(tickTimer,200);
+  updateMovables(); showToast('Devam ▶',900);
+}
+const menuOpen=()=>!$('#startScreen').classList.contains('hidden');
+/* Oynanan bölüm duraklatılır, menüdeki ana buton onu sürdürür.
+   Bitmiş/başarısız bölüm 'menu' durumuna geçer: geciken sonuç kartı menünün üstüne açılmaz. */
+function goHome(){
+  if(G&&G.state==='taxi'){ showToast('Uçak takside! ✈️'); return; }
+  pauseLevel();
+  if(G&&G.state!=='paused') G.state='menu';
+  hideOverlay(); mapEl.classList.add('hidden');
+  const s=$('#startScreen'); s.classList.remove('hidden'); s.scrollTop=0;
+  renderMenu();
+}
+function renderMenu(){
+  $('#menuProg').textContent=progText();
+  renderGrid($('#menuGrid'));
+  startLabel();
+}
+
 /* ================== BÖLÜM HARİTASI & ZORLUK EĞRİSİ ================== */
 function openMap(){
-  if(G&&G.state==='idle'){
-    G.pausedLeft=Math.max(0,(G.deadline-performance.now())/1000);
-    G.state='paused'; clearInterval(timerId); cancelMode(); clearGhost();
-  }
-  $('#mapBack').textContent=G&&G.state==='paused'?'← Bölüme dön':'←';
+  pauseLevel();
+  $('#mapBack').textContent=!menuOpen()&&G&&G.state==='paused'?'← Bölüme dön':'←';
   mapEl.classList.remove('hidden'); mapEl.scrollTop=0;
   renderMap();
 }
+/* Menüden açıldıysa menüye, oyundan açıldıysa duraklatılan bölüme döner */
 function closeMap(){
   mapEl.classList.add('hidden');
-  if(G&&G.state==='paused'){
-    G.state='idle'; G.deadline=performance.now()+G.pausedLeft*1000;
-    clearInterval(timerId); timerId=setInterval(tickTimer,200);
-    updateMovables(); showToast('Devam ▶',900);
-  }
+  if(!menuOpen()) resumeLevel();
 }
+const progText=()=>`✓ ${SAVE.done.filter(Boolean).length}/${LEVELS.length}`;
 function renderMap(){
-  $('#mapProg').textContent=`✓ ${SAVE.done.filter(Boolean).length}/${LEVELS.length}`;
-  renderCurve(); renderGrid(); renderTable();
+  $('#mapProg').textContent=progText();
+  renderCurve(); renderGrid($('#levelGrid')); renderTable();
 }
 function renderCurve(){
   const box=$('#curveBox');
@@ -1511,8 +1558,8 @@ function renderCurve(){
   const bw=Math.max(3,Math.min(24,band-2));
   const Y=v=>m.t+ph*(1-v/10), X=i=>m.l+band*(i+0.5), base=Y(0);
   let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="curveTitle">`;
-  s+=`<rect x="${m.l}" y="${m.t-24}" width="${band*10}" height="${ph+24}" rx="8" fill="var(--band)"/>`;
-  s+=`<text class="axl" x="${m.l+6}" y="${m.t-10}">Çok kolay · 1–10</text>`;
+  /* kolay bölge (0–4): zirveler dışındaki tüm bölümler bu bandın içinde kalır */
+  s+=`<rect x="${m.l}" y="${Y(4)}" width="${pw}" height="${base-Y(4)}" rx="6" fill="var(--band)"/>`;
   for(let v=0;v<=10;v+=2){
     s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v?'var(--gridl)':'var(--baseln)'}" stroke-width="1"/>`;
     s+=`<text class="axl" x="${m.l-6}" y="${Y(v)+3.5}" text-anchor="end">${v}</text>`;
@@ -1551,8 +1598,9 @@ function renderCurve(){
     h.addEventListener('blur',hide);
   });
 }
-function renderGrid(){
-  const g=$('#levelGrid'); g.innerHTML='';
+/* Bölüm butonları: hem ana menüde hem haritada kullanılır */
+function renderGrid(g){
+  g.innerHTML='';
   const nx=nextIdx();
   LEVELS.forEach((L,i)=>{
     const b=document.createElement('button');
@@ -1560,7 +1608,8 @@ function renderGrid(){
     const tag=L.feat?`${FEATS[L.feat].icon} YENİ`:L.tier==='super'?'ÇOK ZOR':L.tier==='hard'?'ZOR':'';
     b.innerHTML=`<span class="lvNum">${i+1}</span><span class="lvTag">${tag}</span>${SAVE.done[i]?'<span class="lvChk">✓</span>':''}`;
     b.title=`${i+1}. ${L.name} • ${TIERS[L.tier].name}`;
-    b.addEventListener('click',()=>openLevel(i));
+    b.setAttribute('aria-label',`Bölüm ${i+1}: ${L.name}, ${TIERS[L.tier].name}${L.feat?', yeni özellik: '+FEATS[L.feat].name:''}${SAVE.done[i]?', tamamlandı':''}`);
+    b.addEventListener('click',()=>{ ac(); openLevel(i); });
     g.appendChild(b);
   });
 }
@@ -1667,14 +1716,20 @@ function engineStop(){
 
 /* ================== BAŞLATMA ================== */
 function startLabel(){
-  const any=SAVE.done.some(Boolean);
-  $('#startBtn').textContent=any?`DEVAM ET • BÖLÜM ${nextIdx()+1} ▶`:'UÇUŞA BAŞLA 🛫';
+  const b=$('#startBtn');
+  if(G&&G.state==='paused') b.textContent=`▶ SÜRDÜR • BÖLÜM ${G.idx+1} · ${fmtTime(G.pausedLeft)}`;
+  else b.textContent=SAVE.done.some(Boolean)?`DEVAM ET • BÖLÜM ${nextIdx()+1} ▶`:'UÇUŞA BAŞLA 🛫';
 }
-startLabel();
-$('#startBtn').addEventListener('click',()=>{ ac(); openLevel(nextIdx()); });
+renderMenu();
+$('#startBtn').addEventListener('click',()=>{
+  ac();
+  if(G&&G.state==='paused'){ $('#startScreen').classList.add('hidden'); resumeLevel(); }
+  else openLevel(nextIdx());
+});
 $('#startMapBtn').addEventListener('click',()=>{ ac(); openMap(); });
+$('#homeBtn').addEventListener('click',goHome);
 $('#mapBtn').addEventListener('click',openMap);
-$('#mapBack').addEventListener('click',()=>{ closeMap(); startLabel(); });
+$('#mapBack').addEventListener('click',()=>{ closeMap(); renderMenu(); });
 let resetArmed=0;
 $('#resetBtn').addEventListener('click',e=>{
   const b=e.currentTarget;
@@ -1683,7 +1738,7 @@ $('#resetBtn').addEventListener('click',e=>{
     return;
   }
   clearTimeout(resetArmed); resetArmed=0; b.textContent='↺ İlerlemeyi sıfırla';
-  SAVE=freshSave(); inv=SAVE.inv; persist(); renderMap(); startLabel();
+  SAVE=freshSave(); inv=SAVE.inv; persist(); renderMap(); renderMenu();
   if(G) updateBoosterBar();
 });
 $('#restartBtn').addEventListener('click',restartLevel);
